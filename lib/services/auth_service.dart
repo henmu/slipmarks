@@ -49,11 +49,11 @@ class AuthService {
   Future<String> login() async {
     try {
       final authorizationTokenRequest = AuthorizationTokenRequest(
-        AUTH0_CLIENT_ID,
-        AUTH0_REDIRECT_URI,
-        issuer: AUTH0_ISSUER,
-        scopes: ['openid', 'profile', 'offline_access', 'email'],
-      );
+          AUTH0_CLIENT_ID, AUTH0_REDIRECT_URI,
+          issuer: AUTH0_ISSUER,
+          scopes: ['openid', 'profile', 'offline_access', 'email'],
+          promptValues: ['login'],
+          additionalParameters: {'audience': AUTH0_AUDIENCE});
 
       final AuthorizationTokenResponse? result =
           await appAuth.authorizeAndExchangeCode(
