@@ -68,6 +68,33 @@ class AuthService {
     }
   }
 
+  Future<bool> logout() async {
+    await secureStorage.delete(key: REFRESH_TOKEN_KEY);
+
+    return true;
+    // TODO: implement properly
+    // final url = Uri.https(
+    //   AUTH0_DOMAIN,
+    //   '/v2/logout',
+    //   {
+    //     'client_id': AUTH0_CLIENT_ID,
+    //     'federated': '',
+    //     //'returnTo': 'YOUR_RETURN_LOGOUT_URL'
+    //   },
+    // );
+
+    // final response = await http.get(
+    //   url,
+    //   headers: {'Authorization': 'Bearer $auth0AccessToken'},
+    // );
+
+    // print(
+    //   'logout: ${response.request} ${response.statusCode} ${response.body}',
+    // );
+
+    // return response.statusCode == 200;
+  }
+
   Auth0IdToken parseIdToken(String idToken) {
     final parts = idToken.split(r'.');
     assert(parts.length == 3);
