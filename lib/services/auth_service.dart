@@ -16,7 +16,7 @@ class AuthService {
   AuthService._internal();
   Auth0User? profile;
   Auth0IdToken? idToken;
-  String? auth0AccessToken;
+  String? accessToken;
 
   final FlutterAppAuth appAuth = const FlutterAppAuth();
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
@@ -135,7 +135,7 @@ class AuthService {
         result != null && result.accessToken != null && result.idToken != null;
 
     if (isValidResult) {
-      auth0AccessToken = result.accessToken;
+      accessToken = result.accessToken;
       idToken = parseIdToken(result.idToken!);
       profile = await getUserDetails(result.accessToken!);
 
