@@ -64,7 +64,7 @@ class AuthService {
     } on PlatformException {
       return 'User has cancelled or no internet!';
     } catch (e) {
-      return 'Unkown Error!';
+      return 'Unknown Error!';
     }
   }
 
