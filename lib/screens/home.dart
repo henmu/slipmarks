@@ -23,7 +23,8 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+        child: Scaffold(
       backgroundColor: const Color(0xFF1f1f1f),
       appBar: AppBar(
         title: const Text(
@@ -62,7 +63,7 @@ class _HomeState extends State<Home> {
           });
         },
       ),
-    );
+    ));
   }
 }
 

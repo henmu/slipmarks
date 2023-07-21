@@ -65,7 +65,8 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+        child: Scaffold(
       backgroundColor: const Color(0xFF1f1f1f),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -96,7 +97,7 @@ class _LoginState extends State<Login> {
             ),
         ], // <Widget>[]
       ),
-    );
+    ));
   }
 }
 
