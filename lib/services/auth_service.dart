@@ -140,6 +140,9 @@ class AuthService {
       profile = await getUserDetails(result.accessToken!);
 
       if (result.refreshToken != null) {
+        // This is called only when user logs in (not when the user restarts the app)
+        registerUser(result.accessToken!);
+
         await secureStorage.write(
           key: REFRESH_TOKEN_KEY,
           value: result.refreshToken,
@@ -150,5 +153,14 @@ class AuthService {
     } else {
       return 'Something is Wrong!';
     }
+  }
+
+  // Register the user to our own database
+  void registerUser(String accessToken) async {
+    final url = Uri.parse('$SERVER_HOST/register');
+    await http.post(
+      url,
+      headers: {'Authorization': 'Bearer $accessToken'},
+    );
   }
 }
