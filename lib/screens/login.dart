@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:slipmarks/screens/home.dart';
 import 'package:slipmarks/services/auth_service.dart';
 
-import 'main.dart';
-
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class Login extends StatefulWidget {
+  const Login({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<Login> createState() => _LoginState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginState extends State<Login> {
   bool isProgressing = false;
   bool isLoggedIn = false;
   String errorMessage = '';
@@ -107,8 +106,8 @@ void navigateToHomePage(BuildContext context) {
   Navigator.replace(
     context,
     oldRoute: ModalRoute.of(context)!,
-    newRoute: MaterialPageRoute(
-        builder: (BuildContext context) => const MyHomePage()),
+    newRoute:
+        MaterialPageRoute(builder: (BuildContext context) => const Home()),
   );
 }
 // class LoginPage extends StatelessWidget {
