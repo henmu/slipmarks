@@ -12,7 +12,7 @@ class Bookmarks extends StatelessWidget {
           'This is the Bookmarks page',
           style: TextStyle(
             fontFamily: 'Inter',
-            color: Colors.white,
+            // color: Colors.white,
           ),
         ),
       ),

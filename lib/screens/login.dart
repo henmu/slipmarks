@@ -46,7 +46,6 @@ class _LoginState extends State<Login> {
   }
 
   initAction() async {
-    setLoadingState();
     final bool isAuth = await AuthService.instance.init();
     if (isAuth) {
       setSuccessAuthState();
@@ -59,42 +58,44 @@ class _LoginState extends State<Login> {
 
   @override
   void initState() {
-    initAction();
     super.initState();
+    initAction();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF1f1f1f),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          if (isProgressing)
-            const CircularProgressIndicator()
-          else if (!isLoggedIn)
-            ElevatedButton(
-                onPressed: loginAction,
-                child: const Text(
-                  'Login | Register2',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 11,
-                  ),
-                ))
-          else
-            Text(
-              'Welcome $name',
-              style: const TextStyle(
-                fontFamily: 'Inter',
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontSize: 11,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            if (isProgressing)
+              const CircularProgressIndicator()
+            else if (!isLoggedIn)
+              ElevatedButton(
+                  onPressed: loginAction,
+                  child: const Text(
+                    'Login | Register2',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      // color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                    ),
+                  ))
+            else
+              Text(
+                'Welcome $name',
+                style: const TextStyle(
+                  fontFamily: 'Inter',
+                  // color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 11,
+                ),
               ),
-            ),
-        ], // <Widget>[]
+          ], // <Widget>[]
+        ),
       ),
     );
   }
@@ -110,22 +111,3 @@ void navigateToHomePage(BuildContext context) {
         MaterialPageRoute(builder: (BuildContext context) => const Home()),
   );
 }
-// class LoginPage extends StatelessWidget {
-//   const LoginPage({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return const Scaffold(
-//       backgroundColor: Colors.transparent,
-//       body: Center(
-//         child: Text(
-//           'This is the Login page ${const String.fromEnvironment("AUTH0_DOMAIN")}',
-//           style: TextStyle(
-//             fontFamily: 'Inter',
-//             color: Colors.white,
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }

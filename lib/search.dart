@@ -12,7 +12,7 @@ class Search extends StatelessWidget {
           'This is the Search page',
           style: TextStyle(
             fontFamily: 'Inter',
-            color: Colors.white,
+            // color: Colors.white,
           ),
         ),
       ),

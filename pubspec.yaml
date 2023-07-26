@@ -9,10 +9,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  url_launcher: ^6.1.12
   http: ^1.1.0
   json_annotation: ^4.8.1
   flutter_appauth: ^6.0.1
   flutter_secure_storage: ^8.0.0
+  swipeable_tile: ^2.0.0+3
 
 dev_dependencies:
   flutter_test:
@@ -24,6 +26,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets: 
+    - assets/IL.png
+    - assets/favicon.ico
+    - links_data.json
 
 flutter_icons:
   android: true
