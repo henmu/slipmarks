@@ -113,7 +113,7 @@ class _LinksState extends State<Links> {
                                   vertical: 9, horizontal: 11),
                               child: Image.asset(
                                 link.iconUrl ??
-                                    'assets/IL.png', // Assuming the icon images are inside the assets folder
+                                    'assets/IL.png', // TODO: Add default bookmarkicon instead of IL.png
                                 width: 32,
                                 height: 32,
                               ),
