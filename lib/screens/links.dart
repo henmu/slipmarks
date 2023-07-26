@@ -182,7 +182,9 @@ class _LinksState extends State<Links> {
                   child: Text('Error loading data'),
                 );
               } else {
-                return const CircularProgressIndicator();
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
               }
             },
           ),
