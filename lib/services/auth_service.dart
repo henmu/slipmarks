@@ -16,7 +16,7 @@ class AuthService {
   AuthService._internal();
   Auth0User? profile;
   Auth0IdToken? idToken;
-  String? auth0AccessToken;
+  String? accessToken;
 
   final FlutterAppAuth appAuth = const FlutterAppAuth();
   final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
@@ -68,6 +68,33 @@ class AuthService {
     }
   }
 
+  Future<bool> logout() async {
+    await secureStorage.delete(key: REFRESH_TOKEN_KEY);
+
+    return true;
+    // TODO: implement properly
+    // final url = Uri.https(
+    //   AUTH0_DOMAIN,
+    //   '/v2/logout',
+    //   {
+    //     'client_id': AUTH0_CLIENT_ID,
+    //     'federated': '',
+    //     //'returnTo': 'YOUR_RETURN_LOGOUT_URL'
+    //   },
+    // );
+
+    // final response = await http.get(
+    //   url,
+    //   headers: {'Authorization': 'Bearer $auth0AccessToken'},
+    // );
+
+    // print(
+    //   'logout: ${response.request} ${response.statusCode} ${response.body}',
+    // );
+
+    // return response.statusCode == 200;
+  }
+
   Auth0IdToken parseIdToken(String idToken) {
     final parts = idToken.split(r'.');
     assert(parts.length == 3);
@@ -108,11 +135,14 @@ class AuthService {
         result != null && result.accessToken != null && result.idToken != null;
 
     if (isValidResult) {
-      auth0AccessToken = result.accessToken;
+      accessToken = result.accessToken;
       idToken = parseIdToken(result.idToken!);
       profile = await getUserDetails(result.accessToken!);
 
       if (result.refreshToken != null) {
+        // This is called only when user logs in (not when the user restarts the app)
+        registerUser(result.accessToken!);
+
         await secureStorage.write(
           key: REFRESH_TOKEN_KEY,
           value: result.refreshToken,
@@ -123,5 +153,14 @@ class AuthService {
     } else {
       return 'Something is Wrong!';
     }
+  }
+
+  // Register the user to our own database
+  void registerUser(String accessToken) async {
+    final url = Uri.parse('$SERVER_HOST/register');
+    await http.post(
+      url,
+      headers: {'Authorization': 'Bearer $accessToken'},
+    );
   }
 }

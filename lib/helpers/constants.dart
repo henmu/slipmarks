@@ -1,3 +1,4 @@
+const SERVER_HOST = String.fromEnvironment('SERVER_HOST');
 const AUTH0_DOMAIN = String.fromEnvironment('AUTH0_DOMAIN');
 const AUTH0_CLIENT_ID = String.fromEnvironment('AUTH0_CLIENT_ID');
 const AUTH0_AUDIENCE = String.fromEnvironment('AUTH0_AUDIENCE');
