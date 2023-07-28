@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 //TODO: Change to using wolt model sheet
 
 class AddBookmarkBottomSheet extends StatefulWidget {
-  const AddBookmarkBottomSheet({super.key});
-
   @override
   _AddBookmarkBottomSheetState createState() => _AddBookmarkBottomSheetState();
 }
@@ -76,7 +74,7 @@ void showAddBookmarkBottomSheet(BuildContext context) {
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(15)),
             ),
-            child: const AddBookmarkBottomSheet(),
+            child: AddBookmarkBottomSheet(),
           ),
         ),
       );
