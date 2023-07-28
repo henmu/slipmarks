@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:slipmarks/elements/add_bookmark_popup.dart';
 import 'package:slipmarks/models/collections.dart';
 import 'package:slipmarks/screens/login.dart';
 import 'package:slipmarks/services/auth_service.dart';
@@ -15,8 +16,6 @@ import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:slipmarks/bookmarkEditSheet.dart';
-
-import 'package:slipmarks/elements/custom_Dismissable_Card.dart';
 import 'package:slipmarks/bookmarkEditSheet.dart';
 
 import 'package:slipmarks/services/providers.dart';
@@ -57,36 +56,14 @@ class _LinksState extends State<Links> {
                     final link = bookmarks[index];
                     return GestureDetector(
                       onTap: () => _launchURL(link.url),
-                      child: CustomDismissableCard(
-                        // borderRadius: 10,
-                        // color: const Color(0xFF282828),
-                        // color: Colors.white,
+                      child: SwipeableTile.card(
+                        borderRadius: 10,
+                        color: const Color(0xFF282828),
                         key: UniqueKey(),
-                        // swipeThreshold: 0.9,
-                        // direction: SwipeDirection.horizontal,
-                        // onSwiped: (_) {
-                        // },
-                        // backgroundBuilder: (context, direction, progress) {
-                        //   if (direction == SwipeDirection.endToStart) {
-                        //     return Container(
-                        //       color: Colors.red,
-                        //     );
-                        //   } else if (direction == SwipeDirection.startToEnd) {
-                        //     return Container(
-                        //       color: Colors.green,
-                        //     );
-                        //   }
-                        //   return Container();
-                        // },
-                        // horizontalPadding: 16,
-                        // verticalPadding: 8,
-                        // shadow: BoxShadow(
-                        //   color: Colors.black.withOpacity(0.35),
-                        //   blurRadius: 4,
-                        //   offset: const Offset(2, 2),
-                        // ),
-                        onDismissed: (direction) {
-                          if (direction == DismissDirection.startToEnd) {
+                        swipeThreshold: 0.9,
+                        direction: SwipeDirection.horizontal,
+                        onSwiped: (direction) {
+                          if (direction == SwipeDirection.startToEnd) {
                             // Handle right swipe
                             WoltModalSheet.show<void>(
                               context: context,
@@ -98,18 +75,30 @@ class _LinksState extends State<Links> {
                                   ).editSheet(modalSheetContext),
                                 ];
                               },
-                              // ... other properties ...
                             );
-                          } else if (direction == DismissDirection.endToStart) {
-                            // Handle left swipe
+                          } else if (direction == SwipeDirection.endToStart) {
+                            // Handle right to left swipe
                           }
                         },
-                        onUpSwipe: () {
-                          // Handle upward swipe
+                        backgroundBuilder: (context, direction, progress) {
+                          if (direction == SwipeDirection.endToStart) {
+                            return Container(
+                              color: Colors.red,
+                            );
+                          } else if (direction == SwipeDirection.startToEnd) {
+                            return Container(
+                              color: Colors.green,
+                            );
+                          }
+                          return Container();
                         },
-                        onDownSwipe: () {
-                          // Handle downward swipe
-                        },
+                        horizontalPadding: 16,
+                        verticalPadding: 8,
+                        shadow: BoxShadow(
+                          color: Colors.black.withOpacity(0.35),
+                          blurRadius: 4,
+                          offset: const Offset(2, 2),
+                        ),
                         child: Row(
                           children: [
                             Padding(
@@ -193,6 +182,20 @@ class _LinksState extends State<Links> {
             },
           );
         }),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            // Show the bottom sheet for adding a new bookmark
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (context) {
+                return const AddBookmarkBottomSheet();
+              },
+            );
+          },
+          child: const Icon(Icons.add),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       ),
     );
   }

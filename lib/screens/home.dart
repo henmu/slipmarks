@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:slipmarks/screens/bookmarks.dart';
 import 'package:slipmarks/screens/favorites.dart';
 import 'package:slipmarks/screens/links.dart';
-import 'package:slipmarks/search.dart';
+import 'package:slipmarks/screens/search.dart';
 import 'package:slipmarks/screens/login.dart';
 import 'package:slipmarks/services/auth_service.dart';
 import 'package:slipmarks/mysalomonbottombar.dart';
