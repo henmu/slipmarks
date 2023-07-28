@@ -15,6 +15,11 @@ dependencies:
   flutter_appauth: ^6.0.1
   flutter_secure_storage: ^8.0.0
   swipeable_tile: ^2.0.0+3
+  wolt_modal_sheet: ^0.0.4
+  wolt_responsive_layout_grid: ^0.0.3
+  flutter_hooks: ^0.18.0
+  hooks_riverpod: ^2.3.7
+  flutter_riverpod: ^2.3.6
 
 dev_dependencies:
   flutter_test:

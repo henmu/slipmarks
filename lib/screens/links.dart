@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:slipmarks/models/collections.dart';
 import 'package:slipmarks/screens/login.dart';
 import 'package:slipmarks/services/auth_service.dart';
 
 import 'package:slipmarks/models/bookmark.dart';
 import 'package:slipmarks/helpers/constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:slipmarks/services/providers.dart';
 
 import 'package:swipeable_tile/swipeable_tile.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
+
+import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
+import 'package:slipmarks/bookmarkEditSheet.dart';
+
+import 'package:slipmarks/elements/custom_Dismissable_Card.dart';
+import 'package:slipmarks/bookmarkEditSheet.dart';
+
+import 'package:slipmarks/services/providers.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<void> _launchURL(String url) async {
   Uri parsedUrl = Uri.parse(url);
@@ -26,86 +37,79 @@ class Links extends StatefulWidget {
 }
 
 class _LinksState extends State<Links> {
-  late Future<List<Bookmark>> _futureTemporaryBookmarks;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _futureTemporaryBookmarks = fetchLinks();
-  }
-
-  Future<List<Bookmark>> fetchLinks() async {
-    final url = Uri.parse("$SERVER_HOST/links");
-    final accessToken = AuthService.instance.accessToken;
-    final response =
-        await http.get(url, headers: {'Authorization': 'Bearer $accessToken'});
-
-    if (response.statusCode == 200) {
-      // (json.decode(response.body) as List) original, but didn't support äö characters.
-      final res = (json.decode(utf8.decode(response.bodyBytes)) as List)
-          .map((bookmarkJson) => Bookmark.fromJson(bookmarkJson))
-          .toList();
-
-      return res;
-    } else {
-      // TODO: show an error in UI instead
-      throw Exception('Failed to load temporary bookmarks');
-    }
-  }
-
-  Future<void> _refreshLinks() async {
-    setState(() {
-      _futureTemporaryBookmarks = fetchLinks();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: RefreshIndicator(
-          onRefresh: _refreshLinks,
-          child: FutureBuilder<List<Bookmark>>(
-            future: _futureTemporaryBookmarks,
-            builder: (context, snapshot) {
-              if (snapshot.hasData &&
-                  snapshot.connectionState == ConnectionState.done) {
-                final links = snapshot.data ?? [];
-                return ListView.builder(
-                  itemCount: links.length,
+        body: Consumer(builder: (context, ref, _) {
+          final AsyncValue<List<Bookmark>> bookmarksAsyncValue =
+              ref.watch(bookmarksProvider);
+          return bookmarksAsyncValue.when(
+            data: (bookmarks) {
+              return RefreshIndicator(
+                onRefresh: () async {
+                  ref.refresh(bookmarksProvider);
+                },
+                child: ListView.builder(
+                  itemCount: bookmarks.length,
                   itemBuilder: (context, index) {
-                    final link = links[index];
+                    final link = bookmarks[index];
                     return GestureDetector(
                       onTap: () => _launchURL(link.url),
-                      child: SwipeableTile.card(
-                        borderRadius: 10,
-                        color: const Color(0xFF282828),
+                      child: CustomDismissableCard(
+                        // borderRadius: 10,
+                        // color: const Color(0xFF282828),
                         // color: Colors.white,
                         key: UniqueKey(),
-                        swipeThreshold: 0.9,
-                        direction: SwipeDirection.horizontal,
-                        onSwiped: (_) {},
-                        backgroundBuilder: (context, direction, progress) {
-                          if (direction == SwipeDirection.endToStart) {
-                            return Container(
-                              color: Colors.red,
+                        // swipeThreshold: 0.9,
+                        // direction: SwipeDirection.horizontal,
+                        // onSwiped: (_) {
+                        // },
+                        // backgroundBuilder: (context, direction, progress) {
+                        //   if (direction == SwipeDirection.endToStart) {
+                        //     return Container(
+                        //       color: Colors.red,
+                        //     );
+                        //   } else if (direction == SwipeDirection.startToEnd) {
+                        //     return Container(
+                        //       color: Colors.green,
+                        //     );
+                        //   }
+                        //   return Container();
+                        // },
+                        // horizontalPadding: 16,
+                        // verticalPadding: 8,
+                        // shadow: BoxShadow(
+                        //   color: Colors.black.withOpacity(0.35),
+                        //   blurRadius: 4,
+                        //   offset: const Offset(2, 2),
+                        // ),
+                        onDismissed: (direction) {
+                          if (direction == DismissDirection.startToEnd) {
+                            // Handle right swipe
+                            WoltModalSheet.show<void>(
+                              context: context,
+                              pageListBuilder: (modalSheetContext) {
+                                return [
+                                  BookmarkEditSheet(
+                                    bookmark: link,
+                                    context: modalSheetContext,
+                                  ).editSheet(modalSheetContext),
+                                ];
+                              },
+                              // ... other properties ...
                             );
-                          } else if (direction == SwipeDirection.startToEnd) {
-                            return Container(
-                              color: Colors.green,
-                            );
+                          } else if (direction == DismissDirection.endToStart) {
+                            // Handle left swipe
                           }
-                          return Container();
                         },
-                        horizontalPadding: 16,
-                        verticalPadding: 8,
-                        shadow: BoxShadow(
-                          color: Colors.black.withOpacity(0.35),
-                          blurRadius: 4,
-                          offset: const Offset(2, 2),
-                        ),
+                        onUpSwipe: () {
+                          // Handle upward swipe
+                        },
+                        onDownSwipe: () {
+                          // Handle downward swipe
+                        },
                         child: Row(
                           children: [
                             Padding(
@@ -176,19 +180,19 @@ class _LinksState extends State<Links> {
                       ),
                     );
                   },
-                );
-              } else if (snapshot.hasError) {
-                return const Center(
-                  child: Text('Error loading data'),
-                );
-              } else {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
+                ),
+              );
             },
-          ),
-        ),
+            error: (Object error, StackTrace stackTrace) {
+              return const Center(
+                child: Text('Error loading data'),
+              );
+            },
+            loading: () {
+              return const Center(child: CircularProgressIndicator());
+            },
+          );
+        }),
       ),
     );
   }
