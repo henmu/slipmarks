@@ -114,30 +114,23 @@ class _LinksState extends State<Links> {
                         ),
                         child: Row(
                           children: [
-                            FutureBuilder<Widget>(
-                              future: _fetchFavicon(link.iconUrl),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  // Return a loading indicator while fetching the favicon
-                                  return const CircularProgressIndicator();
-                                } else {
-                                  // Return the fetched favicon or default website icon
-                                  return snapshot.data!;
-                                }
-                              },
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 9, horizontal: 11),
+                              child: FutureBuilder<Widget>(
+                                future: _fetchFavicon(link.iconUrl),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    // Return a loading indicator while fetching the favicon
+                                    return const CircularProgressIndicator();
+                                  } else {
+                                    // Return the fetched favicon or default website icon
+                                    return snapshot.data!;
+                                  }
+                                },
+                              ),
                             ),
-                            // child: Padding(
-                            //   padding: const EdgeInsets.symmetric(
-                            //       vertical: 9, horizontal: 11),
-                            //   child: Image.asset(
-                            //     link.iconUrl ??
-                            //         'assets/IL.png', // TODO: Add default bookmarkicon instead of IL.png
-                            //     width: 32,
-                            //     height: 32,
-                            //   ),
-                            // ),
-                            // ),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
