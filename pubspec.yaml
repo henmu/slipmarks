@@ -33,7 +33,6 @@ flutter:
   uses-material-design: true
   assets: 
     - assets/IL.png
-    - assets/favicon.ico
     - links_data.json
 
 flutter_icons:
