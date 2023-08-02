@@ -1,25 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:slipmarks/elements/add_bookmark_popup.dart';
-import 'package:slipmarks/models/collections.dart';
-import 'package:slipmarks/screens/login.dart';
-import 'package:slipmarks/services/auth_service.dart';
 
 import 'package:slipmarks/models/bookmark.dart';
-import 'package:slipmarks/helpers/constants.dart';
-import 'package:http/http.dart' as http;
 import 'package:slipmarks/services/providers.dart';
 
 import 'package:swipeable_tile/swipeable_tile.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'dart:convert';
-import 'package:flutter/services.dart' show rootBundle;
 
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:slipmarks/bookmarkEditSheet.dart';
-import 'package:slipmarks/bookmarkEditSheet.dart';
-
-import 'package:slipmarks/services/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:http/http.dart' as http;
 
 Future<void> _launchURL(String url) async {
   Uri parsedUrl = Uri.parse(url);
@@ -36,6 +28,27 @@ class Links extends StatefulWidget {
 }
 
 class _LinksState extends State<Links> {
+  Future<Widget> _fetchFavicon(String? iconUrl) async {
+    try {
+      if (iconUrl == null) {
+        // Return the default website icon if iconUrl is null
+        return const Icon(Icons.link);
+      }
+
+      final response = await http.get(Uri.parse(iconUrl));
+      if (response.statusCode == 200) {
+        // Return the fetched favicon as an Image widget
+        return Image.memory(response.bodyBytes, width: 32, height: 32);
+      } else {
+        // Return the default website icon if fetching fails
+        return const Icon(Icons.link);
+      }
+    } catch (e) {
+      // Return the default website icon if an error occurs during fetching
+      return const Icon(Icons.link);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -101,16 +114,30 @@ class _LinksState extends State<Links> {
                         ),
                         child: Row(
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 9, horizontal: 11),
-                              child: Image.asset(
-                                link.iconUrl ??
-                                    'assets/IL.png', // TODO: Add default bookmarkicon instead of IL.png
-                                width: 32,
-                                height: 32,
-                              ),
+                            FutureBuilder<Widget>(
+                              future: _fetchFavicon(link.iconUrl),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  // Return a loading indicator while fetching the favicon
+                                  return const CircularProgressIndicator();
+                                } else {
+                                  // Return the fetched favicon or default website icon
+                                  return snapshot.data!;
+                                }
+                              },
                             ),
+                            // child: Padding(
+                            //   padding: const EdgeInsets.symmetric(
+                            //       vertical: 9, horizontal: 11),
+                            //   child: Image.asset(
+                            //     link.iconUrl ??
+                            //         'assets/IL.png', // TODO: Add default bookmarkicon instead of IL.png
+                            //     width: 32,
+                            //     height: 32,
+                            //   ),
+                            // ),
+                            // ),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
