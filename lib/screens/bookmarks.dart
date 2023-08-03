@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:slipmarks/bookmarkEditSheet.dart';
 import 'package:slipmarks/elements/add_bookmark_dialog.dart';
 import 'package:slipmarks/models/collections.dart';
 import 'package:slipmarks/services/providers.dart';
 import 'package:swipeable_tile/swipeable_tile.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
-import 'package:slipmarks/bookmarkEditSheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 Future<void> _launchURL(String url) async {
   Uri parsedUrl = Uri.parse(url);
@@ -113,7 +113,7 @@ class Bookmarks extends ConsumerWidget {
                                 ),
                               ),
                               Expanded(
-                                child: Column(
+                                child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     // Collection title
@@ -126,25 +126,13 @@ class Bookmarks extends ConsumerWidget {
                                         maxLines: 1,
                                       ),
                                     ),
-                                    // Collection URL
-                                    const Padding(
-                                      padding: EdgeInsets.only(right: 1),
-                                      child: Text(
-                                        'collection.url',
-                                        style: TextStyle(
-                                            color: Color(0xFF979797),
-                                            fontSize: 12),
-                                        overflow: TextOverflow.clip,
-                                        maxLines: 1,
-                                      ),
-                                    ),
                                     // Small arrow to indicate expansion state
                                     Padding(
                                       padding: const EdgeInsets.all(8),
                                       child: Icon(
                                         isExpanded
-                                            ? Icons.arrow_drop_up
-                                            : Icons.arrow_drop_down,
+                                            ? Icons.arrow_drop_down
+                                            : Icons.arrow_right,
                                         color: Color(0xFFB1B1B1),
                                       ),
                                     )
@@ -176,25 +164,134 @@ class Bookmarks extends ConsumerWidget {
   }
 
   List<Widget> _buildBookmarksList(String collectionId, WidgetRef ref) {
-    // Add 'ref' as a parameter here
     final bookmarksAsyncValue =
         ref.watch(bookmarksByCollectionProvider(collectionId));
     return bookmarksAsyncValue.when(
       data: (bookmarks) {
         return [
-          // ... Existing code ...
-          // Build the list of bookmarks here
-          // For example, you can use ListView.builder to display the bookmarks as a list
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: bookmarks.length,
             itemBuilder: (context, index) {
               final bookmark = bookmarks[index];
-              // Build the UI for each bookmark item here
-              return ListTile(
-                title: Text(bookmark.name),
-                // Add other widgets to display bookmark details or actions
+              return GestureDetector(
+                onTap: () => _launchURL(bookmark.url),
+                child: SwipeableTile.card(
+                  borderRadius: 10,
+                  color: const Color(0xFF282828),
+                  key: UniqueKey(),
+                  swipeThreshold: 0.9,
+                  direction: SwipeDirection.horizontal,
+                  onSwiped: (direction) {
+                    if (direction == SwipeDirection.startToEnd) {
+                      // Handle right swipe
+                      WoltModalSheet.show<void>(
+                        context: context,
+                        pageListBuilder: (modalSheetContext) {
+                          return [
+                            BookmarkEditSheet(
+                              bookmark: bookmark,
+                              context: modalSheetContext,
+                            ).editSheet(modalSheetContext),
+                          ];
+                        },
+                      );
+                    } else if (direction == SwipeDirection.endToStart) {
+                      // Handle right to left swipe (Delete)
+                    }
+                  },
+                  backgroundBuilder: (context, direction, progress) {
+                    if (direction == SwipeDirection.endToStart) {
+                      return Container(
+                        color: Colors.red,
+                      );
+                    } else if (direction == SwipeDirection.startToEnd) {
+                      return Container(
+                        color: Colors.green,
+                      );
+                    }
+                    return Container();
+                  },
+                  horizontalPadding: 16,
+                  verticalPadding: 8,
+                  shadow: BoxShadow(
+                    color: Colors.black.withOpacity(0.35),
+                    blurRadius: 4,
+                    offset: const Offset(2, 2),
+                  ),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 9, horizontal: 11),
+                        child: FutureBuilder<Widget>(
+                          future: _fetchFavicon(bookmark.iconUrl),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              // Return a loading indicator while fetching the favicon
+                              return const CircularProgressIndicator();
+                            } else {
+                              // Return the fetched favicon or default website icon
+                              return snapshot.data!;
+                            }
+                          },
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Bookmark title
+                            Padding(
+                              padding: const EdgeInsets.only(top: 12),
+                              child: Text(
+                                bookmark.name,
+                                // style: const TextStyle(color: Colors.white),
+                                overflow: TextOverflow.clip,
+                                maxLines: 1,
+                              ),
+                            ),
+                            // Bookmark URL
+                            Padding(
+                              padding: const EdgeInsets.only(right: 1),
+                              child: Text(
+                                bookmark.url,
+                                style: const TextStyle(
+                                    color: Color(0xFF979797), fontSize: 12),
+                                overflow: TextOverflow.clip,
+                                maxLines: 1,
+                              ),
+                            ),
+                            // Footer
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                // Timestamp
+                                Text(
+                                  bookmark.createdAt ?? '00',
+                                  textAlign: TextAlign.end,
+                                  style: const TextStyle(
+                                      color: Color(0xFFB1B1B1), fontSize: 12),
+                                ),
+                                // Triple dot
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 8),
+                                  child: Icon(
+                                    Icons.more_horiz,
+                                    color: Color(0xFFB1B1B1),
+                                    size: 18,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               );
             },
           ),
@@ -207,38 +304,5 @@ class Bookmarks extends ConsumerWidget {
         return [const CircularProgressIndicator()];
       },
     );
-  }
-}
-
-Future<void> closeCollection(String collectionId) async {
-  // Add the logic to close the collection based on the collectionId
-  // For example, you can make an API call to update the collection status
-  // to closed and then refresh the collectionsProvider to reflect the changes.
-  // After that, you can update the UI or show a confirmation message to the user.
-  try {
-    // Example API call to close the collection
-    // final response = await http.put(
-    //   Uri.parse('$API_BASE_URL/collections/$collectionId/close'),
-    //   headers: {'Authorization': 'Bearer $ACCESS_TOKEN'},
-    // );
-    // if (response.statusCode == 200) {
-    //   // Collection closed successfully, refresh the collectionsProvider
-    //   context.refresh(collectionsProvider);
-    //   // Show a confirmation message to the user
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text('Collection closed successfully')),
-    //   );
-    // } else {
-    //   // Failed to close the collection, show an error message
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     SnackBar(content: Text('Failed to close the collection')),
-    //   );
-    // }
-  } catch (e) {
-    // Error handling for the API request
-    // Show an error message to the user
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(content: Text('Error closing the collection: $e')),
-    // );
   }
 }
