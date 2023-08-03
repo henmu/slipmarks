@@ -12,6 +12,7 @@ import 'package:slipmarks/bookmarkEditSheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 Future<void> _launchURL(String url) async {
   Uri parsedUrl = Uri.parse(url);
@@ -21,6 +22,8 @@ Future<void> _launchURL(String url) async {
 }
 
 class Links extends ConsumerStatefulWidget {
+  const Links({super.key});
+
   @override
   _LinksStateState createState() => _LinksStateState();
 }
@@ -54,6 +57,16 @@ class _LinksStateState extends ConsumerState<Links> {
       print('Error deleting bookmark: $e');
       // Show an error message to the user
     }
+  }
+
+  String _formatDateTime(String? timestamp) {
+    if (timestamp == null) return 'Unknown';
+
+    final dateTime = DateTime.tryParse(timestamp);
+    if (dateTime == null) return 'Invalid Date';
+
+    final formatter = DateFormat('dd/MM HH:mm');
+    return formatter.format(dateTime);
   }
 
   @override
@@ -148,7 +161,6 @@ class _LinksStateState extends ConsumerState<Links> {
                                     padding: const EdgeInsets.only(top: 12),
                                     child: Text(
                                       link.name,
-                                      // style: const TextStyle(color: Colors.white),
                                       overflow: TextOverflow.clip,
                                       maxLines: 1,
                                     ),
@@ -171,7 +183,7 @@ class _LinksStateState extends ConsumerState<Links> {
                                     children: [
                                       //Timestamp
                                       Text(
-                                        link.createdAt ?? '00',
+                                        _formatDateTime(link.createdAt),
                                         textAlign: TextAlign.end,
                                         style: const TextStyle(
                                             color: Color(0xFFB1B1B1),
