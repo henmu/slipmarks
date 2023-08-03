@@ -47,119 +47,71 @@ class Bookmarks extends ConsumerWidget {
 
     return SafeArea(
       child: Scaffold(
-          backgroundColor: Colors.transparent,
-          body: collectionsAsyncValue.when(
-            data: (collections) {
-              return ListView.builder(
-                itemCount: collections.length,
-                itemBuilder: (context, index) {
-                  final collection = collections[index];
-                  final isExpanded =
-                      expandedCollections.contains(collection.id);
+        backgroundColor: Colors.transparent,
+        body: collectionsAsyncValue.when(
+          data: (collections) {
+            return ListView.builder(
+              itemCount: collections.length,
+              itemBuilder: (context, index) {
+                final collection = collections[index];
+                final isExpanded = expandedCollections.contains(collection.id);
 
-                  return Column(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          // Toggle the collection expansion state
-                          if (isExpanded) {
-                            expandedCollections.remove(collection.id);
-                          } else {
-                            expandedCollections.add(collection.id);
-                          }
-                          // Refresh the UI after updating the expansion state
-                          ref.refresh(collectionsProvider);
-                        },
-                        child: SwipeableTile.card(
-                          borderRadius: 10,
-                          color: const Color(0xFF282828),
-                          key: UniqueKey(),
-                          swipeThreshold: 0.9,
-                          direction: SwipeDirection.horizontal,
-                          onSwiped: (direction) {
-                            if (direction == SwipeDirection.startToEnd) {
-                              // Handle right swipe
-                            } else if (direction == SwipeDirection.endToStart) {
-                              // Handle right to left swipe
-                            }
-                          },
-                          backgroundBuilder: (context, direction, progress) {
-                            if (direction == SwipeDirection.endToStart) {
-                              return Container(
-                                color: Colors.red,
-                              );
-                            } else if (direction == SwipeDirection.startToEnd) {
-                              return Container(
-                                color: Colors.green,
-                              );
-                            }
-                            return Container();
-                          },
-                          horizontalPadding: 16,
-                          verticalPadding: 8,
-                          shadow: BoxShadow(
-                            color: Colors.black.withOpacity(0.35),
-                            blurRadius: 4,
-                            offset: const Offset(2, 2),
-                          ),
-                          child: Row(
-                            children: [
-                              // Folder icon on the left
-                              const Padding(
-                                padding: EdgeInsets.all(8),
-                                child: Icon(
-                                  Icons.folder,
-                                  color: Color(0xFFB1B1B1),
-                                ),
-                              ),
-                              Expanded(
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Collection title
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 12),
-                                      child: Text(
-                                        collection.name,
-                                        // style: const TextStyle(color: Colors.white),
-                                        overflow: TextOverflow.clip,
-                                        maxLines: 1,
-                                      ),
-                                    ),
-                                    // Small arrow to indicate expansion state
-                                    Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: Icon(
-                                        isExpanded
-                                            ? Icons.arrow_drop_down
-                                            : Icons.arrow_right,
-                                        color: Color(0xFFB1B1B1),
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                return Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        // Toggle the collection expansion state
+                        if (isExpanded) {
+                          expandedCollections.remove(collection.id);
+                        } else {
+                          expandedCollections.add(collection.id);
+                        }
+                        // Refresh the UI after updating the expansion state
+                        ref.refresh(collectionsProvider);
+                      },
+                      child: ListTile(
+                        leading: const Icon(
+                          Icons.folder_outlined,
+                          color: Color(0xFFB1B1B1),
+                        ),
+                        title: Row(
+                          children: [
+                            Text(
+                              collection.name,
+                              overflow: TextOverflow.clip,
+                              maxLines: 1,
+                            ),
+                            Icon(
+                              isExpanded
+                                  ? Icons.arrow_drop_down
+                                  : Icons.arrow_right,
+                              color: const Color(0xFFB1B1B1),
+                            ),
+                          ],
+                        ),
+                        trailing: const Icon(
+                          Icons.more_horiz,
+                          color: Color(0xFFB1B1B1),
                         ),
                       ),
-                      // Show bookmarks when the collection is expanded
-                      if (isExpanded)
-                        ..._buildBookmarksList(collection.id, ref),
-                    ],
-                  );
-                },
-              );
-            },
-            error: (Object error, StackTrace stackTrace) {
-              return const Center(
-                child: Text('Error loading data'),
-              );
-            },
-            loading: () {
-              return const Center(child: CircularProgressIndicator());
-            },
-          )),
+                    ),
+                    // Show bookmarks when the collection is expanded
+                    if (isExpanded) ..._buildBookmarksList(collection.id, ref),
+                  ],
+                );
+              },
+            );
+          },
+          error: (Object error, StackTrace stackTrace) {
+            return const Center(
+              child: Text('Error loading data'),
+            );
+          },
+          loading: () {
+            return const Center(child: CircularProgressIndicator());
+          },
+        ),
+      ),
     );
   }
 
@@ -265,18 +217,11 @@ class Bookmarks extends ConsumerWidget {
                               ),
                             ),
                             // Footer
-                            Row(
+                            const Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                // Timestamp
-                                Text(
-                                  bookmark.createdAt ?? '00',
-                                  textAlign: TextAlign.end,
-                                  style: const TextStyle(
-                                      color: Color(0xFFB1B1B1), fontSize: 12),
-                                ),
                                 // Triple dot
-                                const Padding(
+                                Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 8),
                                   child: Icon(
                                     Icons.more_horiz,
