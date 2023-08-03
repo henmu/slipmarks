@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:swipeable_tile/swipeable_tile.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'dart:convert' show json;
-import 'package:flutter/services.dart' show rootBundle;
 
 class Favorites extends StatelessWidget {
   const Favorites({super.key});

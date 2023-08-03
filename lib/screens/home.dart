@@ -18,10 +18,10 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int _currentIndex = 0;
   final List<Widget> _pages = [
-    const Links(),
+    Links(),
     Bookmarks(),
-    const Favorites(),
-    const Search(),
+    Favorites(),
+    Search(),
   ];
 
   // Instance of MessagingService for handling notifications
