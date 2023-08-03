@@ -8,7 +8,7 @@ import 'package:swipeable_tile/swipeable_tile.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
-import 'package:slipmarks/bookmarkEditSheet.dart';
+import 'package:slipmarks/elements/bookmarkEditSheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:http/http.dart' as http;

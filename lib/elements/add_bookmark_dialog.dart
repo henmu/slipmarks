@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:http/http.dart' as http;
-import 'package:html/parser.dart' show parse;
 
 import 'package:flutter/material.dart';
 import 'package:slipmarks/helpers/constants.dart';

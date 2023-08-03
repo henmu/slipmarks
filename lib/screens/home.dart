@@ -5,7 +5,7 @@ import 'package:slipmarks/screens/links.dart';
 import 'package:slipmarks/screens/search.dart';
 import 'package:slipmarks/screens/login.dart';
 import 'package:slipmarks/services/auth_service.dart';
-import 'package:slipmarks/mysalomonbottombar.dart';
+import 'package:slipmarks/elements/mysalomonbottombar.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
