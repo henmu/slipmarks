@@ -42,6 +42,24 @@ final collectionsProvider = FutureProvider<List<Collections>>((ref) async {
   }
 });
 
+final bookmarksByCollectionProvider =
+    FutureProviderFamily<List<Bookmark>, String>((ref, collectionId) async {
+  final url = Uri.parse("$SERVER_HOST/collections/$collectionId/bookmarks");
+  final accessToken = AuthService.instance.accessToken;
+  final response =
+      await http.get(url, headers: {'Authorization': 'Bearer $accessToken'});
+
+  if (response.statusCode == 200) {
+    final res = (json.decode(utf8.decode(response.bodyBytes)) as List)
+        .map((bookmarkJson) => Bookmark.fromJson(bookmarkJson))
+        .toList();
+
+    return res;
+  } else {
+    throw Exception('Failed to load bookmarks for collection');
+  }
+});
+
 final bookmarkDeletionProvider =
     FutureProvider.family<void, String>((ref, bookmarkId) async {
   final url = Uri.parse('$SERVER_HOST/bookmarks/$bookmarkId');
