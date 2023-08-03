@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:slipmarks/elements/add_bookmark_popup.dart';
+import 'package:slipmarks/elements/add_bookmark_dialog.dart';
 
 import 'package:slipmarks/models/bookmark.dart';
 import 'package:slipmarks/services/providers.dart';
@@ -98,8 +98,7 @@ class _LinksStateState extends ConsumerState<Links> {
                             );
                           } else if (direction == SwipeDirection.endToStart) {
                             // Handle right to left swipe (Delete)
-                            _deleteBookmark(link
-                                .id!); // Assuming bookmark has an 'id' property
+                            _deleteBookmark(link.id!);
                           }
                         },
                         backgroundBuilder: (context, direction, progress) {
@@ -214,13 +213,7 @@ class _LinksStateState extends ConsumerState<Links> {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             // Show the bottom sheet for adding a new bookmark
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              builder: (context) {
-                return AddBookmarkBottomSheet();
-              },
-            );
+            showAddBookmarkDialog(context);
           },
           child: const Icon(Icons.add),
         ),

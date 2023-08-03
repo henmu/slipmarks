@@ -11,30 +11,25 @@ import 'package:slipmarks/helpers/favicon_finder.dart';
 import 'package:slipmarks/models/bookmark.dart';
 import 'package:slipmarks/services/auth_service.dart';
 
-//TODO: Change to using wolt model sheet
-
-class AddBookmarkBottomSheet extends StatefulWidget {
+class AddBookmarkDialog extends StatefulWidget {
   @override
-  _AddBookmarkBottomSheetState createState() => _AddBookmarkBottomSheetState();
+  _AddBookmarkDialogState createState() => _AddBookmarkDialogState();
 }
 
-class _AddBookmarkBottomSheetState extends State<AddBookmarkBottomSheet> {
+class _AddBookmarkDialogState extends State<AddBookmarkDialog> {
   TextEditingController urlController = TextEditingController();
   TextEditingController nameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: EdgeInsets.all(16),
       child: Container(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-          left: 16,
-          right: 16,
-          top: 16,
-        ),
-        decoration: const BoxDecoration(
-          color: Color(0xFF2D2D2D),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2D2D2D),
+          borderRadius: BorderRadius.circular(15),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -74,7 +69,7 @@ class _AddBookmarkBottomSheetState extends State<AddBookmarkBottomSheet> {
 
                 String jsonData = jsonEncode(newBookmark.toJson());
 
-// Print the JSON data to the console
+                // Print the JSON data to the console
                 print(jsonData);
 
                 try {
@@ -93,10 +88,7 @@ class _AddBookmarkBottomSheetState extends State<AddBookmarkBottomSheet> {
                   // Check the response and handle any errors if needed
                   if (response.statusCode == 201) {
                     // Bookmark creation success
-                    final completer = Completer();
-                    completer.future.whenComplete(() {
-                      Navigator.of(context).pop();
-                    }); // Close the bottom sheet
+                    Navigator.of(context).pop(); // Close the dialog
                   } else {
                     // Bookmark creation failed
                     print('Response Code: ${response.statusCode}');
@@ -134,27 +126,15 @@ Future<String?> fetchFaviconUrl(String url) async {
   return null;
 }
 
-void showAddBookmarkBottomSheet(BuildContext context) {
-  showModalBottomSheet(
+void showAddBookmarkDialog(BuildContext context) {
+  showDialog(
     context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
+    barrierDismissible: true,
     builder: (context) {
-      return GestureDetector(
-        onTap: () {
-          // To prevent tapping on the bottom sheet itself from closing it
-        },
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.9),
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(15)),
-            ),
-            child: AddBookmarkBottomSheet(),
-          ),
+      return BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+        child: Center(
+          child: AddBookmarkDialog(),
         ),
       );
     },
