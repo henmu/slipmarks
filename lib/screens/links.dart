@@ -163,7 +163,7 @@ class _LinksState extends State<Links> {
                                     children: [
                                       //Timestamp
                                       Text(
-                                        link.createdAt,
+                                        link.createdAt ?? '00',
                                         textAlign: TextAlign.end,
                                         style: const TextStyle(
                                             color: Color(0xFFB1B1B1),

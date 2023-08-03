@@ -4,22 +4,29 @@ part 'bookmark.g.dart';
 @JsonSerializable()
 class Bookmark {
   Bookmark({
-    required this.id,
+    this.id,
     required this.name,
     required this.url,
-    required this.iconUrl,
-    required this.createdAt,
+    this.iconUrl,
+    this.createdAt,
   });
-  final String id;
+
+  String? id;
   final String name;
   final String url;
   @JsonKey(name: 'icon_url')
   final String? iconUrl;
   @JsonKey(name: 'created_at')
-  final String createdAt;
+  final String? createdAt;
 
   factory Bookmark.fromJson(Map<String, dynamic> json) =>
       _$BookmarkFromJson(json);
 
-  Map<String, dynamic> toJson() => _$BookmarkToJson(this);
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'url': url,
+      'icon_url': iconUrl,
+    };
+  }
 }

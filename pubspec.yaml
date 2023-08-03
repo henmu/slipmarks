@@ -19,7 +19,7 @@ dependencies:
   wolt_responsive_layout_grid: ^0.0.3
   flutter_hooks: ^0.18.0
   hooks_riverpod: ^2.3.7
-  flutter_riverpod: ^2.3.6
+  html: ^0.15.4
 
 dev_dependencies:
   flutter_test:
