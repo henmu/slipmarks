@@ -33,9 +33,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets: 
-    - assets/IL.png
-    - links_data.json
 
 flutter_icons:
   android: true
