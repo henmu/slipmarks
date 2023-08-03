@@ -7,6 +7,7 @@ import 'package:html/parser.dart' show parse;
 
 import 'package:flutter/material.dart';
 import 'package:slipmarks/helpers/constants.dart';
+import 'package:slipmarks/helpers/favicon_finder.dart';
 import 'package:slipmarks/models/bookmark.dart';
 import 'package:slipmarks/services/auth_service.dart';
 
@@ -120,39 +121,11 @@ class _AddBookmarkBottomSheetState extends State<AddBookmarkBottomSheet> {
 
 Future<String?> fetchFaviconUrl(String url) async {
   try {
-    // if (url.startsWith('//')) {
-    //   // Append the protocol manually
-    //   url = 'https:$url';
-    // }
+    // Use FaviconFinder to get the best favicon URL for the provided URL
+    Favicon? favicon = await FaviconFinder.getBest(url);
 
-    final uri = Uri.parse(url);
-    final response = await http.get(uri);
-
-    if (response.statusCode == 200) {
-      final document = parse(response.body);
-      final linkTags = document.getElementsByTagName('link');
-
-      for (var tag in linkTags) {
-        final relAttribute = tag.attributes['rel'];
-        final hrefAttribute = tag.attributes['href'];
-
-        if ((relAttribute == 'shortcut icon' || relAttribute == 'icon') &&
-            hrefAttribute != null &&
-            hrefAttribute.isNotEmpty) {
-          // Combine the URL to get the full favicon URL
-          String faviconUrl = Uri.parse(hrefAttribute).toString();
-
-          // Check if the favicon URL is still protocol-relative
-          if (faviconUrl.startsWith('//')) {
-            // Append the protocol manually again
-            faviconUrl = 'https:$faviconUrl';
-          }
-
-          // Return the found favicon URL
-          return faviconUrl;
-        }
-      }
-    }
+    // Return the favicon URL if found
+    return favicon?.url;
   } catch (e) {
     print('Error fetching favicon URL: $e');
   }
