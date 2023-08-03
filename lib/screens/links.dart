@@ -20,14 +20,12 @@ Future<void> _launchURL(String url) async {
   }
 }
 
-class Links extends StatefulWidget {
-  const Links({super.key});
-
+class Links extends ConsumerStatefulWidget {
   @override
-  _LinksState createState() => _LinksState();
+  _LinksStateState createState() => _LinksStateState();
 }
 
-class _LinksState extends State<Links> {
+class _LinksStateState extends ConsumerState<Links> {
   Future<Widget> _fetchFavicon(String? iconUrl) async {
     try {
       if (iconUrl == null) {
@@ -46,6 +44,15 @@ class _LinksState extends State<Links> {
     } catch (e) {
       // Return the default website icon if an error occurs during fetching
       return const Icon(Icons.link);
+    }
+  }
+
+  Future<void> _deleteBookmark(String bookmarkId) async {
+    try {
+      ref.read(bookmarkDeletionProvider(bookmarkId));
+    } catch (e) {
+      print('Error deleting bookmark: $e');
+      // Show an error message to the user
     }
   }
 
@@ -90,7 +97,9 @@ class _LinksState extends State<Links> {
                               },
                             );
                           } else if (direction == SwipeDirection.endToStart) {
-                            // Handle right to left swipe
+                            // Handle right to left swipe (Delete)
+                            _deleteBookmark(link
+                                .id!); // Assuming bookmark has an 'id' property
                           }
                         },
                         backgroundBuilder: (context, direction, progress) {

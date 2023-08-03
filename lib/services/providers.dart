@@ -41,3 +41,17 @@ final collectionsProvider = FutureProvider<List<Collections>>((ref) async {
     throw Exception('Failed to load collections');
   }
 });
+
+final bookmarkDeletionProvider =
+    FutureProvider.family<void, String>((ref, bookmarkId) async {
+  final url = Uri.parse('$SERVER_HOST/bookmarks/$bookmarkId');
+  final accessToken = AuthService.instance.accessToken;
+  final response = await http.delete(
+    url,
+    headers: {'Authorization': 'Bearer $accessToken'},
+  );
+
+  if (response.statusCode != 204) {
+    throw Exception('Failed to delete the bookmark');
+  }
+});
