@@ -1,10 +1,13 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:slipmarks/helpers/constants.dart';
 
 class MessagingService {
   static String? fcmToken;
   static final MessagingService _instance = MessagingService._internal();
   factory MessagingService() => _instance;
+  final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
   MessagingService._internal();
 
@@ -29,6 +32,14 @@ class MessagingService {
     fcmToken = await _fcm.getToken();
     print('fcmToken: $fcmToken');
 
+    final storedFcmToken = await secureStorage.read(key: FCM_TOKEN_KEY);
+    if (fcmToken != storedFcmToken) {
+      await secureStorage.write(key: FCM_TOKEN_KEY, value: fcmToken);
+      print("fcm token is new, sending it to server");
+      // TODO: send token to server
+    } else {
+      print("fcm token was the same as old one, not updating to server");
+    }
 
     // Handling background messages using the specified handler
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
