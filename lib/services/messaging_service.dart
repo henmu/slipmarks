@@ -25,40 +25,44 @@ class MessagingService {
       sound: true,
     );
 
-    debugPrint(
-        'User granted notifications permission: ${settings.authorizationStatus}');
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      // Retrieving the FCM token
+      fcmToken = await _fcm.getToken();
+      print('fcmToken: $fcmToken');
 
-    // Retrieving the FCM token
-    fcmToken = await _fcm.getToken();
-    print('fcmToken: $fcmToken');
-
-    final storedFcmToken = await secureStorage.read(key: FCM_TOKEN_KEY);
-    if (fcmToken != storedFcmToken) {
-      await secureStorage.write(key: FCM_TOKEN_KEY, value: fcmToken);
-      print("fcm token is new, sending it to server");
-      // TODO: send token to server
-    } else {
-      print("fcm token was the same as old one, not updating to server");
-    }
-
-    // Handling background messages using the specified handler
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-    // Listening for incoming messages while the app is in the foreground
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint('Message title: ${message.notification!.title.toString()}');
-
-      if (message.notification != null) {
-        if (message.notification!.title != null &&
-            message.notification!.body != null) {
-          final notificationData = message.data;
-          debugPrint('Message data: $notificationData');
-
-          // TODO: show notification in app
-        }
+      // Read the old token from secure storage and compare it with the new one
+      // If its different, update the token on the server
+      final storedFcmToken = await secureStorage.read(key: FCM_TOKEN_KEY);
+      if (fcmToken != storedFcmToken) {
+        await secureStorage.write(key: FCM_TOKEN_KEY, value: fcmToken);
+        print("fcm token is new, sending it to server");
+        // TODO: send token to server
+      } else {
+        debugPrint("fcm token was the same as old one, not updating to server");
       }
-    });
 
+      // Handling background messages using the specified handler
+      FirebaseMessaging.onBackgroundMessage(
+          _firebaseMessagingBackgroundHandler);
+
+      // Listening for incoming messages while the app is in the foreground
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        debugPrint('Message title: ${message.notification!.title.toString()}');
+
+        if (message.notification != null) {
+          if (message.notification!.title != null &&
+              message.notification!.body != null) {
+            final notificationData = message.data;
+            debugPrint('Message data: $notificationData');
+
+            // TODO: show notification in app or open link in browser
+          }
+        }
+      });
+    } else {
+      debugPrint('User declined or has not accepted permission');
+    }
+  }
 }
 
 // Handler for background messages
