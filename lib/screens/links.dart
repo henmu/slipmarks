@@ -16,7 +16,7 @@ import 'package:intl/intl.dart';
 
 Future<void> _launchURL(String url) async {
   Uri parsedUrl = Uri.parse(url);
-  if (!await launchUrl(parsedUrl)) {
+  if (!await launchUrl(parsedUrl, mode: LaunchMode.externalApplication)) {
     throw 'Could not launch $parsedUrl';
   }
 }
