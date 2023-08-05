@@ -5,7 +5,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:slipmarks/firebase_options.dart';
 import 'package:slipmarks/screens/home.dart';
 import 'package:slipmarks/screens/login.dart';
-import 'package:slipmarks/services/messaging_service.dart';
 
 Future<void> main() async {
   SystemChrome.setSystemUIOverlayStyle(
@@ -22,23 +21,8 @@ Future<void> main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  // Instance of MessagingService for handling notifications
-  final _messagingService = MessagingService();
-
-  @override
-  void initState() {
-    super.initState();
-    // Initialize MessagingService to handle notifications
-    _messagingService.init(context);
-  }
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
