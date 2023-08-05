@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -36,7 +39,10 @@ class MessagingService {
       if (fcmToken != storedFcmToken) {
         await secureStorage.write(key: FCM_TOKEN_KEY, value: fcmToken);
         print("fcm token is new, sending it to server");
-        // TODO: send token to server
+
+        var model = await getDeviceModel();
+        print("Device model: $model");
+        // TODO: send token + device model + platform to server
       } else {
         debugPrint("fcm token was the same as old one, not updating to server");
       }
@@ -62,6 +68,23 @@ class MessagingService {
     } else {
       debugPrint('User declined or has not accepted permission');
     }
+  }
+
+  Future<String> getDeviceModel() async {
+    late String model;
+
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    if (Platform.isIOS) {
+      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+      model = iosInfo.utsname.machine;
+    } else if (Platform.isAndroid) {
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      model = androidInfo.model;
+    } else {
+      model = 'unknown';
+    }
+
+    return model;
   }
 }
 

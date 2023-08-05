@@ -25,6 +25,7 @@ dependencies:
   intl: ^0.18.1
   firebase_messaging: ^14.6.5
   firebase_core: ^2.15.0
+  device_info_plus: ^9.0.3
 
 dev_dependencies:
   flutter_test:
