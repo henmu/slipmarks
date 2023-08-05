@@ -49,3 +49,6 @@ config-prod.json
 
 #Generated models
 *.g.dart
+
+# FCM config
+google-services.json
