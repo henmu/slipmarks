@@ -32,6 +32,22 @@ class MessagingService {
 
     // Handling background messages using the specified handler
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    // Listening for incoming messages while the app is in the foreground
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint('Message title: ${message.notification!.title.toString()}');
+
+      if (message.notification != null) {
+        if (message.notification!.title != null &&
+            message.notification!.body != null) {
+          final notificationData = message.data;
+          debugPrint('Message data: $notificationData');
+
+          // TODO: show notification in app
+        }
+      }
+    });
+
 }
 
 // Handler for background messages
