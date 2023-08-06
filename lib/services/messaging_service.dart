@@ -60,7 +60,16 @@ class MessagingService {
 
       // Listening for incoming messages while the app is in the foreground
       FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-        openNotificationLinkInBrowser(context, message);
+        final snackBar = SnackBar(
+            content: const Text('Received a bookmark!',
+                style: TextStyle(color: Colors.white)),
+            backgroundColor: Colors.deepOrange[300],
+            action: SnackBarAction(
+              label: 'Open in browser',
+              onPressed: () => openNotificationLinkInBrowser(context, message),
+              textColor: Colors.white,
+            ));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
       });
 
       // Handling the initial message received when the app is launched from dead (killed state)
