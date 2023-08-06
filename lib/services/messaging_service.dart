@@ -36,14 +36,14 @@ class MessagingService {
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
       // Retrieving the FCM token
       fcmToken = await _fcm.getToken();
-      print('fcmToken: $fcmToken');
+      debugPrint('fcmToken: $fcmToken');
 
       // Read the old token from secure storage and compare it with the new one
       // If its different, update the token on the server
       final storedFcmToken = await secureStorage.read(key: FCM_TOKEN_KEY);
       if (fcmToken != storedFcmToken) {
         await secureStorage.write(key: FCM_TOKEN_KEY, value: fcmToken);
-        print("fcm token is new, sending it to server");
+        debugPrint("fcm token is new, sending it to server");
 
         if (fcmToken != null) {
           sendTokenToServer(fcmToken!);
@@ -92,10 +92,10 @@ class MessagingService {
 
   Future<void> sendTokenToServer(String pushToken) async {
     var (id, model) = await getDeviceModelAndUniqueId();
-    print("Device id: $id");
-    print("Device model: $model");
-    print("Push token: $fcmToken");
-    print("Platform: ${Platform.operatingSystem.toUpperCase()}");
+    debugPrint("Device id: $id");
+    debugPrint("Device model: $model");
+    debugPrint("Push token: $fcmToken");
+    debugPrint("Platform: ${Platform.operatingSystem.toUpperCase()}");
 
     try {
       final accessToken = AuthService.instance.accessToken;
