@@ -60,11 +60,21 @@ class MessagingService {
 
       // Listening for incoming messages while the app is in the foreground
       FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-        // If the notification has `url` data open it in the browser
-        if (message.data.containsKey('url')) {
-          String url = message.data['url'];
-          openUrlInBrowser(url);
+        openNotificationLinkInBrowser(context, message);
+      });
+
+      // Handling the initial message received when the app is launched from dead (killed state)
+      // When the app is killed and a new notification arrives when user clicks on it
+      // It gets the data to which screen to open
+      FirebaseMessaging.instance.getInitialMessage().then((message) {
+        if (message != null) {
+          openNotificationLinkInBrowser(context, message);
         }
+      });
+
+      // Handling a notification click event when the app is in the background
+      FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+        openNotificationLinkInBrowser(context, message);
       });
     } else {
       debugPrint('User declined or has not accepted permission');
@@ -133,12 +143,21 @@ class MessagingService {
       debugPrint("Error opening url in browser: $e");
     }
   }
+
+  // Handling a notification click event by navigating to the specified screen
+  void openNotificationLinkInBrowser(
+      BuildContext context, RemoteMessage message) {
+    // If the notification has `url` data open it in the browser
+    if (message.data.containsKey('url')) {
+      String url = message.data['url'];
+      openUrlInBrowser(url);
+    }
+  }
 }
 
 // Handler for background messages
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // If you're going to use other Firebase services in the background, such as Firestore,
-  // make sure you call `initializeApp` before using other Firebase services.
-  debugPrint('Handling a background message: ${message.notification!.title}');
+  // Do nothing when the app is in the background. Clicking the link
+  // will trigger opening it in the browser via `onMessageOpenedApp`
 }
