@@ -9,6 +9,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:slipmarks/helpers/constants.dart';
 import 'package:http/http.dart' as http;
 import 'package:slipmarks/services/auth_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MessagingService {
   static String? fcmToken;
@@ -58,17 +59,11 @@ class MessagingService {
           _firebaseMessagingBackgroundHandler);
 
       // Listening for incoming messages while the app is in the foreground
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-        debugPrint('Message title: ${message.notification!.title.toString()}');
-
-        if (message.notification != null) {
-          if (message.notification!.title != null &&
-              message.notification!.body != null) {
-            final notificationData = message.data;
-            debugPrint('Message data: $notificationData');
-
-            // TODO: show notification in app or open link in browser
-          }
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+        // If the notification has `url` data open it in the browser
+        if (message.data.containsKey('url')) {
+          String url = message.data['url'];
+          openUrlInBrowser(url);
         }
       });
     } else {
@@ -124,6 +119,19 @@ class MessagingService {
     }
 
     return (id, model);
+  }
+
+  Future<void> openUrlInBrowser(String url) async {
+    try {
+      Uri urlToOpen = Uri.parse(url);
+
+      // Open the url in external browser
+      if (!await launchUrl(urlToOpen, mode: LaunchMode.externalApplication)) {
+        throw Exception('Could not launch $url');
+      }
+    } catch (e) {
+      debugPrint("Error opening url in browser: $e");
+    }
   }
 }
 
