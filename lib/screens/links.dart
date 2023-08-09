@@ -30,12 +30,21 @@ class Links extends ConsumerStatefulWidget {
 }
 
 class _LinksStateState extends ConsumerState<Links> {
-  // static const MethodChannel _channel = MethodChannel('web_content_share');
+  String selectedFilter = '7d'; // Default filter
+
+  // Options for filter
+  List<String> filterOptions = ['1d', '3d', '7d', '14d'];
+
+  // Function to update the selected filter
+  void updateFilter(String filter) {
+    setState(() {
+      selectedFilter = filter;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-    // _channel.setMethodCallHandler(_handleMethodCall);
   }
 
   Future<Widget> _fetchFavicon(String? iconUrl) async {
@@ -83,154 +92,208 @@ class _LinksStateState extends ConsumerState<Links> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        body: Consumer(builder: (context, ref, _) {
-          final AsyncValue<List<Bookmark>> bookmarksAsyncValue =
-              ref.watch(bookmarksFutureProvider);
-          return bookmarksAsyncValue.when(
-            data: (bookmarks) {
-              return RefreshIndicator(
-                onRefresh: () async {
-                  ref.refresh(bookmarksFutureProvider);
-                },
-                child: ListView.builder(
-                  itemCount: bookmarks.length,
-                  itemBuilder: (context, index) {
-                    final link = bookmarks[index];
-                    return GestureDetector(
-                      onTap: () => _launchURL(link.url),
-                      child: SwipeableTile.card(
-                        borderRadius: 10,
-                        color: const Color(0xFF282828),
-                        key: UniqueKey(),
-                        swipeThreshold: 0.9,
-                        direction: SwipeDirection.horizontal,
-                        onSwiped: (direction) {
-                          if (direction == SwipeDirection.startToEnd) {
-                            // Handle right swipe
-                            WoltModalSheet.show<void>(
-                              context: context,
-                              pageListBuilder: (modalSheetContext) {
-                                return [
-                                  BookmarkEditSheet(
-                                    bookmark: link,
-                                    context: modalSheetContext,
-                                  ).editSheet(modalSheetContext),
-                                ];
-                              },
-                            );
-                          } else if (direction == SwipeDirection.endToStart) {
-                            // Handle right to left swipe (Delete)
-                            _deleteBookmark(link.id!);
-                          }
-                        },
-                        backgroundBuilder: (context, direction, progress) {
-                          if (direction == SwipeDirection.endToStart) {
-                            return Container(
-                              color: Colors.red,
-                            );
-                          } else if (direction == SwipeDirection.startToEnd) {
-                            return Container(
-                              color: Colors.green,
-                            );
-                          }
-                          return Container();
-                        },
-                        horizontalPadding: 16,
-                        verticalPadding: 8,
-                        shadow: BoxShadow(
-                          color: Colors.black.withOpacity(0.35),
-                          blurRadius: 4,
-                          offset: const Offset(2, 2),
+        body: Column(
+          children: [
+            //Header with filter and sort options
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      //Filter Text
+                      const Text('All', style: TextStyle(color: Colors.white)),
+                      const SizedBox(width: 8),
+                      Text(selectedFilter,
+                          style: const TextStyle(color: Colors.white)),
+                      //Dropdown arrow icon
+                      IconButton(
+                          onPressed: () {
+                            //Handle press
+                          },
+                          icon: const Icon(
+                            Icons.arrow_drop_down,
+                            color: Colors.white,
+                          ))
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      //Sort icon
+                      IconButton(
+                        icon: const Icon(
+                          Icons.sort,
+                          color: Colors.white,
                         ),
-                        child: Row(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 9, horizontal: 11),
-                              child: FutureBuilder<Widget>(
-                                future: _fetchFavicon(link.iconUrl),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    // Return a loading indicator while fetching the favicon
-                                    return const CircularProgressIndicator();
-                                  } else {
-                                    // Return the fetched favicon or default website icon
-                                    return snapshot.data!;
-                                  }
-                                },
+                        onPressed: () {
+                          //Implement sorting logic
+                        },
+                      )
+                    ],
+                  )
+                ],
+              ),
+            ),
+            Expanded(
+              child: Consumer(builder: (context, ref, _) {
+                final AsyncValue<List<Bookmark>> bookmarksAsyncValue =
+                    ref.watch(bookmarksFutureProvider);
+                return bookmarksAsyncValue.when(
+                  data: (bookmarks) {
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        ref.refresh(bookmarksFutureProvider);
+                      },
+                      child: ListView.builder(
+                        itemCount: bookmarks.length,
+                        itemBuilder: (context, index) {
+                          final link = bookmarks[index];
+                          return GestureDetector(
+                            onTap: () => _launchURL(link.url),
+                            child: SwipeableTile.card(
+                              borderRadius: 10,
+                              color: const Color(0xFF282828),
+                              key: UniqueKey(),
+                              swipeThreshold: 0.9,
+                              direction: SwipeDirection.horizontal,
+                              onSwiped: (direction) {
+                                if (direction == SwipeDirection.startToEnd) {
+                                  // Handle right swipe
+                                  WoltModalSheet.show<void>(
+                                    context: context,
+                                    pageListBuilder: (modalSheetContext) {
+                                      return [
+                                        BookmarkEditSheet(
+                                          bookmark: link,
+                                          context: modalSheetContext,
+                                        ).editSheet(modalSheetContext),
+                                      ];
+                                    },
+                                  );
+                                } else if (direction ==
+                                    SwipeDirection.endToStart) {
+                                  // Handle right to left swipe (Delete)
+                                  _deleteBookmark(link.id!);
+                                }
+                              },
+                              backgroundBuilder:
+                                  (context, direction, progress) {
+                                if (direction == SwipeDirection.endToStart) {
+                                  return Container(
+                                    color: Colors.red,
+                                  );
+                                } else if (direction ==
+                                    SwipeDirection.startToEnd) {
+                                  return Container(
+                                    color: Colors.green,
+                                  );
+                                }
+                                return Container();
+                              },
+                              horizontalPadding: 16,
+                              verticalPadding: 8,
+                              shadow: BoxShadow(
+                                color: Colors.black.withOpacity(0.35),
+                                blurRadius: 4,
+                                offset: const Offset(2, 2),
                               ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              child: Row(
                                 children: [
-                                  //Links title
                                   Padding(
-                                    padding: const EdgeInsets.only(top: 12),
-                                    child: Text(
-                                      link.name,
-                                      overflow: TextOverflow.clip,
-                                      maxLines: 1,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 9, horizontal: 11),
+                                    child: FutureBuilder<Widget>(
+                                      future: _fetchFavicon(link.iconUrl),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.waiting) {
+                                          // Return a loading indicator while fetching the favicon
+                                          return const CircularProgressIndicator();
+                                        } else {
+                                          // Return the fetched favicon or default website icon
+                                          return snapshot.data!;
+                                        }
+                                      },
                                     ),
                                   ),
-                                  //Links URL
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 1),
-                                    child: Text(
-                                      link.url,
-                                      style: const TextStyle(
-                                          color: Color(0xFF979797),
-                                          fontSize: 12),
-                                      overflow: TextOverflow.clip,
-                                      maxLines: 1,
-                                    ),
-                                  ),
-                                  //Footer
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      //Timestamp
-                                      Text(
-                                        _formatDateTime(link.createdAt),
-                                        textAlign: TextAlign.end,
-                                        style: const TextStyle(
-                                            color: Color(0xFFB1B1B1),
-                                            fontSize: 12),
-                                      ),
-                                      //Triple dot
-                                      const Padding(
-                                        padding:
-                                            EdgeInsets.symmetric(horizontal: 8),
-                                        child: Icon(
-                                          Icons.more_horiz,
-                                          color: Color(0xFFB1B1B1),
-                                          size: 18,
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        //Links title
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 12),
+                                          child: Text(
+                                            link.name,
+                                            overflow: TextOverflow.clip,
+                                            maxLines: 1,
+                                          ),
                                         ),
-                                      )
-                                    ],
+                                        //Links URL
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(right: 1),
+                                          child: Text(
+                                            link.url,
+                                            style: const TextStyle(
+                                                color: Color(0xFF979797),
+                                                fontSize: 12),
+                                            overflow: TextOverflow.clip,
+                                            maxLines: 1,
+                                          ),
+                                        ),
+                                        //Footer
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            //Timestamp
+                                            Text(
+                                              _formatDateTime(link.createdAt),
+                                              textAlign: TextAlign.end,
+                                              style: const TextStyle(
+                                                  color: Color(0xFFB1B1B1),
+                                                  fontSize: 12),
+                                            ),
+                                            //Triple dot
+                                            const Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 8),
+                                              child: Icon(
+                                                Icons.more_horiz,
+                                                color: Color(0xFFB1B1B1),
+                                                size: 18,
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
                     );
                   },
-                ),
-              );
-            },
-            error: (Object error, StackTrace stackTrace) {
-              return const Center(
-                child: Text('Error loading data'),
-              );
-            },
-            loading: () {
-              return const Center(child: CircularProgressIndicator());
-            },
-          );
-        }),
+                  error: (Object error, StackTrace stackTrace) {
+                    return const Center(
+                      child: Text('Error loading data'),
+                    );
+                  },
+                  loading: () {
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             // Show the bottom sheet for adding a new bookmark
