@@ -11,6 +11,12 @@ import 'package:slipmarks/models/bookmark.dart';
 import 'package:slipmarks/services/auth_service.dart';
 
 class AddBookmarkDialog extends StatefulWidget {
+  final String? initialName;
+  final String? initialUrl;
+
+  const AddBookmarkDialog({Key? key, this.initialName, this.initialUrl})
+      : super(key: key);
+
   @override
   _AddBookmarkDialogState createState() => _AddBookmarkDialogState();
 }
@@ -18,6 +24,13 @@ class AddBookmarkDialog extends StatefulWidget {
 class _AddBookmarkDialogState extends State<AddBookmarkDialog> {
   TextEditingController urlController = TextEditingController();
   TextEditingController nameController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    nameController.text = widget.initialName ?? '';
+    urlController.text = widget.initialUrl ?? '';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +138,7 @@ Future<String?> fetchFaviconUrl(String url) async {
   return null;
 }
 
-void showAddBookmarkDialog(BuildContext context) {
+void showAddBookmarkDialog(BuildContext context, {String? name, String? url}) {
   showDialog(
     context: context,
     barrierDismissible: true,
@@ -133,7 +146,10 @@ void showAddBookmarkDialog(BuildContext context) {
       return BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
         child: Center(
-          child: AddBookmarkDialog(),
+          child: AddBookmarkDialog(
+            initialName: name,
+            initialUrl: url,
+          ),
         ),
       );
     },

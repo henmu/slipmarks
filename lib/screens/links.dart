@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:slipmarks/elements/add_bookmark_dialog.dart';
 
 import 'package:slipmarks/models/bookmark.dart';
@@ -13,6 +14,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+
+import 'package:slipmarks/services/method_channel.dart';
+import 'package:html/parser.dart' as html_parser;
+import 'package:http/http.dart' as http;
 
 Future<void> _launchURL(String url) async {
   Uri parsedUrl = Uri.parse(url);
@@ -29,6 +34,47 @@ class Links extends ConsumerStatefulWidget {
 }
 
 class _LinksStateState extends ConsumerState<Links> {
+  static const MethodChannel _channel = MethodChannel('web_content_share');
+
+  @override
+  void initState() {
+    super.initState();
+    _channel.setMethodCallHandler(_handleMethodCall);
+  }
+
+  Future<void> _handleMethodCall(MethodCall call) async {
+    if (call.method == 'handleSharedContent') {
+      String sharedContent = call.arguments;
+
+      // Fetch the webpage content using http package
+      String webpageContent = await fetchWebpageContent(sharedContent);
+
+      // Parse the HTML content to extract the title
+      String pageTitle = parseTitleFromHTML(webpageContent);
+
+      // Use the pageTitle and sharedContent to create a new bookmark
+      showAddBookmarkDialog(context, name: pageTitle, url: sharedContent);
+    }
+  }
+
+// Fetch the webpage content using http package
+  Future<String> fetchWebpageContent(String url) async {
+    http.Response response = await http.get(Uri.parse(url));
+    return response.body;
+  }
+
+// Parse the title from the HTML content
+  String parseTitleFromHTML(String htmlContent) {
+    var document = html_parser.parse(htmlContent);
+    var titleElement = document.head?.querySelector('title');
+
+    if (titleElement != null) {
+      return titleElement.text;
+    } else {
+      return ''; // Default title if no title tag is found
+    }
+  }
+
   Future<Widget> _fetchFavicon(String? iconUrl) async {
     try {
       if (iconUrl == null) {
