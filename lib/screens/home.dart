@@ -6,7 +6,6 @@ import 'package:slipmarks/screens/search.dart';
 import 'package:slipmarks/screens/login.dart';
 import 'package:slipmarks/services/auth_service.dart';
 import 'package:slipmarks/elements/mysalomonbottombar.dart';
-import 'package:slipmarks/services/messaging_service.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -24,15 +23,9 @@ class _HomeState extends State<Home> {
     Search(),
   ];
 
-  // Instance of MessagingService for handling notifications
-  final _messagingService = MessagingService();
-
   @override
   void initState() {
     super.initState();
-
-    // Initialize MessagingService to handle notifications
-    _messagingService.init(context);
   }
 
   @override
