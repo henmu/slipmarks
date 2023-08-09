@@ -8,7 +8,7 @@ import 'package:slipmarks/models/collections.dart';
 
 import 'package:slipmarks/services/auth_service.dart';
 
-final bookmarksProvider = FutureProvider<List<Bookmark>>((ref) async {
+final bookmarksFutureProvider = FutureProvider<List<Bookmark>>((ref) async {
   final url = Uri.parse("$SERVER_HOST/links");
   final accessToken = AuthService.instance.accessToken;
   final response =
@@ -24,6 +24,19 @@ final bookmarksProvider = FutureProvider<List<Bookmark>>((ref) async {
     throw Exception('Failed to load temporary bookmarks');
   }
 });
+
+final bookmarksProvider =
+    StateNotifierProvider<BookmarksNotifier, List<Bookmark>>(
+  (ref) => BookmarksNotifier(),
+);
+
+class BookmarksNotifier extends StateNotifier<List<Bookmark>> {
+  BookmarksNotifier() : super([]);
+
+  void updateBookmarks(List<Bookmark> newBookmarks) {
+    state = newBookmarks;
+  }
+}
 
 final collectionsProvider = FutureProvider<List<Collections>>((ref) async {
   final url = Uri.parse("$SERVER_HOST/collections");

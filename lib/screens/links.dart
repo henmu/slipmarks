@@ -76,12 +76,12 @@ class _LinksStateState extends ConsumerState<Links> {
         backgroundColor: Colors.transparent,
         body: Consumer(builder: (context, ref, _) {
           final AsyncValue<List<Bookmark>> bookmarksAsyncValue =
-              ref.watch(bookmarksProvider);
+              ref.watch(bookmarksFutureProvider);
           return bookmarksAsyncValue.when(
             data: (bookmarks) {
               return RefreshIndicator(
                 onRefresh: () async {
-                  ref.refresh(bookmarksProvider);
+                  ref.refresh(bookmarksFutureProvider);
                 },
                 child: ListView.builder(
                   itemCount: bookmarks.length,

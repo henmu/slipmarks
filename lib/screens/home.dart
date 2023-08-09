@@ -109,7 +109,6 @@ class _HomeState extends State<Home> {
                           Text(
                             AuthService.instance.profile?.nickname ?? '',
                             style: const TextStyle(
-                              // color: Colors.white,
                               fontFamily: 'Inter',
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -133,13 +132,9 @@ class _HomeState extends State<Home> {
               ListTile(
                 leading: const Icon(
                   Icons.settings,
-                  // color: Colors.white,
                 ),
                 title: const Text(
                   'Settings',
-                  style: TextStyle(
-                      // color: Colors.white,
-                      ),
                 ),
                 onTap: () {
                   // Handle the onTap event for the Settings list tile
@@ -148,13 +143,10 @@ class _HomeState extends State<Home> {
               ListTile(
                 leading: const Icon(
                   Icons.logout,
-                  // color: Colors.white,
                 ),
                 title: const Text(
                   'Logout',
-                  style: TextStyle(
-                      // color: Colors.white,
-                      ),
+                  style: TextStyle(),
                 ),
                 onTap: () async {
                   await AuthService.instance.logout();

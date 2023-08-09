@@ -8,7 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:slipmarks/helpers/constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:slipmarks/models/bookmark.dart';
 import 'package:slipmarks/services/auth_service.dart';
+import 'package:slipmarks/services/providers.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class MessagingService {
@@ -20,6 +22,25 @@ class MessagingService {
   MessagingService._internal();
 
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
+
+  void showSnackbar(BuildContext context, RemoteMessage message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text(
+          'Received a bookmark!',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.deepOrange[300],
+        duration: const Duration(seconds: 30), // Adjust the duration as needed
+        behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(
+          label: 'Open',
+          onPressed: () => openNotificationLinkInBrowser(context, message),
+          textColor: Colors.white,
+        ),
+      ),
+    );
+  }
 
   Future<void> init(BuildContext context) async {
     // Requesting permission for notifications
@@ -59,18 +80,21 @@ class MessagingService {
           _firebaseMessagingBackgroundHandler);
 
       // Listening for incoming messages while the app is in the foreground
-      FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-        final snackBar = SnackBar(
-            content: const Text('Received a bookmark!',
-                style: TextStyle(color: Colors.white)),
-            backgroundColor: Colors.deepOrange[300],
-            action: SnackBarAction(
-              label: 'Open in browser',
-              onPressed: () => openNotificationLinkInBrowser(context, message),
-              textColor: Colors.white,
-            ));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        showSnackbar(context, message);
       });
+      // FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+      //   final snackBar = SnackBar(
+      //       content: const Text('Received a bookmark!',
+      //           style: TextStyle(color: Colors.white)),
+      //       backgroundColor: Colors.deepOrange[300],
+      //       action: SnackBarAction(
+      //         label: 'Open in browser',
+      //         onPressed: () => openNotificationLinkInBrowser(context, message),
+      //         textColor: Colors.white,
+      //       ));
+      //   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      // });
 
       // Handling the initial message received when the app is launched from dead (killed state)
       // When the app is killed and a new notification arrives when user clicks on it
