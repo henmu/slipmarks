@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:slipmarks/elements/add_bookmark_dialog.dart';
-import 'package:slipmarks/elements/open_send_sheet.dart';
+import 'package:slipmarks/elements/open_send_dialog.dart';
 
 import 'package:slipmarks/models/bookmark.dart';
 import 'package:slipmarks/services/providers.dart';
@@ -153,17 +153,21 @@ class _LinksStateState extends ConsumerState<Links> {
                           return GestureDetector(
                             // onTap: () => _launchURL(link.url),
                             onTap: () {
-                              WoltModalSheet.show<void>(
-                                context: context,
-                                pageListBuilder: (modalSheetContext) {
-                                  return [
-                                    OpenAndSendSheet(
-                                      bookmark: link,
-                                      context: modalSheetContext,
-                                    ).openAndSendSheet(modalSheetContext),
-                                  ];
-                                },
-                              );
+                              // WoltModalSheet.show<void>(
+                              //   context: context,
+                              //   pageListBuilder: (modalSheetContext) {
+                              //     return [
+                              //       OpenAndSendSheet(
+                              //         bookmark: link,
+                              //         context: modalSheetContext,
+                              //       ).openAndSendSheet(modalSheetContext),
+                              //     ];
+                              //   },
+                              // );
+                              // Create an instance of OpenAndSendSheet and open the dialog
+                              final openAndSendDialog = OpenAndSendDialog(
+                                  bookmark: link, context: context);
+                              openAndSendDialog.openAndSendDialog();
                             },
                             child: SwipeableTile.card(
                               borderRadius: 10,
