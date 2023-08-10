@@ -11,6 +11,8 @@ import 'package:slipmarks/models/collections.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+//TODO: When creating new collection add it to the list temporarily or change dropdown menus text to that, without adding to the list.
+//TODO: When renaminng update bookmarks name too.
 class BookmarkEditSheet {
   final Bookmark bookmark;
   final BuildContext context;
@@ -150,8 +152,6 @@ class BookmarkEditSheet {
                       return DropdownButton<String>(
                         value: selectedCollectionId,
                         onChanged: (value) {
-                          // If the user selects the "Add New Collection" item,
-                          // set selectedCollectionId to null to represent adding a new collection
                           if (value == 'add_new_collection') {
                             _createNewCollection(
                                 context); // Show the dialog for creating a new collection
@@ -173,7 +173,6 @@ class BookmarkEditSheet {
                             value: 'other',
                             child: Text('Other'),
                           ),
-
                           // Add other collections to the dropdown menu
                           ...collectionsList.map((collection) {
                             return DropdownMenuItem(

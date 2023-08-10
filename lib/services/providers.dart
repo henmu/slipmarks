@@ -39,6 +39,34 @@ class BookmarksNotifier extends StateNotifier<List<Bookmark>> {
   }
 }
 
+final bookmarkNameUpdateProvider =
+    FutureProviderFamily<void, BookmarkUpdateParameters>(
+  (ref, params) async {
+    final url = Uri.parse('$SERVER_HOST/bookmarks/${params.bookmarkId}');
+    final accessToken = AuthService.instance.accessToken;
+
+    final response = await http.patch(
+      url,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({'name': params.newName}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update the bookmark name');
+    }
+  },
+);
+
+class BookmarkUpdateParameters {
+  final String? bookmarkId;
+  final String newName;
+
+  BookmarkUpdateParameters(this.bookmarkId, this.newName);
+}
+
 final collectionsProvider = FutureProvider<List<Collections>>((ref) async {
   final url = Uri.parse("$SERVER_HOST/collections");
   final accessToken = AuthService.instance.accessToken;

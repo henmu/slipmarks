@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:slipmarks/elements/add_bookmark_dialog.dart';
+import 'package:slipmarks/elements/new_bookmark_dialog.dart';
 import 'package:slipmarks/elements/bookmark_popup_menu.dart';
 import 'package:slipmarks/elements/open_send_dialog.dart';
 
@@ -9,7 +9,7 @@ import 'package:slipmarks/services/providers.dart';
 import 'package:swipeable_tile/swipeable_tile.dart';
 
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
-import 'package:slipmarks/elements/bookmark_edit_sheet.dart';
+import 'package:slipmarks/elements/bookmark_addition_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:http/http.dart' as http;
@@ -277,11 +277,6 @@ class _LinksStateState extends ConsumerState<Links> {
                                                     // Handle "Details" action
                                                   } else if (choice == 'add') {
                                                     // Handle "Add" action
-                                                  } else if (choice ==
-                                                      'favorite') {
-                                                    // Handle "Favorite" action
-                                                  } else if (choice == 'edit') {
-                                                    // Handle "Edit" action
                                                     WoltModalSheet.show<void>(
                                                       context: context,
                                                       pageListBuilder:
@@ -294,6 +289,76 @@ class _LinksStateState extends ConsumerState<Links> {
                                                           ).editSheet(
                                                               modalSheetContext),
                                                         ];
+                                                      },
+                                                    );
+                                                  } else if (choice ==
+                                                      'favorite') {
+                                                    // Handle "Favorite" action
+                                                  } else if (choice == 'edit') {
+                                                    // Show a dialog with a text field for the new bookmark name
+
+                                                    //TODO: Refresh when success response from server
+                                                    showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext
+                                                          dialogContext) {
+                                                        TextEditingController
+                                                            newNameController =
+                                                            TextEditingController();
+                                                        return AlertDialog(
+                                                          title: const Text(
+                                                              'Edit Bookmark Name'),
+                                                          content: TextField(
+                                                            controller:
+                                                                newNameController,
+                                                            decoration:
+                                                                const InputDecoration(
+                                                                    labelText:
+                                                                        'New Bookmark Name'),
+                                                          ),
+                                                          actions: <Widget>[
+                                                            ElevatedButton(
+                                                              child: const Text(
+                                                                  'Cancel'),
+                                                              onPressed: () {
+                                                                Navigator.of(
+                                                                        dialogContext)
+                                                                    .pop();
+                                                              },
+                                                            ),
+                                                            ElevatedButton(
+                                                              child: const Text(
+                                                                  'Save'),
+                                                              onPressed:
+                                                                  () async {
+                                                                String
+                                                                    newBookmarkName =
+                                                                    newNameController
+                                                                        .text;
+                                                                if (newBookmarkName
+                                                                    .isNotEmpty) {
+                                                                  try {
+                                                                    // Call the provider to update the bookmark name
+                                                                    final bookmarkUpdateParams =
+                                                                        BookmarkUpdateParameters(
+                                                                            link.id,
+                                                                            newBookmarkName);
+                                                                    await ref.read(
+                                                                        bookmarkNameUpdateProvider(bookmarkUpdateParams)
+                                                                            .future);
+                                                                    Navigator.of(
+                                                                            dialogContext)
+                                                                        .pop(); // Close the dialog
+                                                                  } catch (error) {
+                                                                    print(
+                                                                        'Failed to update bookmark name: $error');
+                                                                    // Handle the error, e.g., show an error message to the user
+                                                                  }
+                                                                }
+                                                              },
+                                                            ),
+                                                          ],
+                                                        );
                                                       },
                                                     );
                                                   } else if (choice ==

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:slipmarks/elements/bookmark_edit_sheet.dart';
+import 'package:slipmarks/elements/bookmark_addition_sheet.dart';
 import 'package:slipmarks/services/providers.dart';
 import 'package:swipeable_tile/swipeable_tile.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -14,6 +14,8 @@ Future<void> _launchURL(String url) async {
   }
 }
 
+//TODO: Refresh collectionsBookmarks somehow
+//TODO: Add collection edit/remove
 class Bookmarks extends ConsumerWidget {
   // Store the collection expansion state using a Set
   final Set<String> expandedCollections = {};

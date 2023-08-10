@@ -18,3 +18,7 @@ samples, guidance on mobile development, and a full API reference.
 
 TODO:
     Add share menu handling to iOs devices
+
+```shell
+dart run build_runner build --delete-conflicting-outputs
+```
