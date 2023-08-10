@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:slipmarks/elements/bookmarkEditSheet.dart';
+import 'package:slipmarks/elements/bookmark_edit_sheet.dart';
 import 'package:slipmarks/services/providers.dart';
 import 'package:swipeable_tile/swipeable_tile.dart';
 import 'package:url_launcher/url_launcher.dart';

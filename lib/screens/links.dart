@@ -10,7 +10,7 @@ import 'package:slipmarks/services/providers.dart';
 import 'package:swipeable_tile/swipeable_tile.dart';
 
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
-import 'package:slipmarks/elements/bookmarkEditSheet.dart';
+import 'package:slipmarks/elements/bookmark_edit_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:http/http.dart' as http;

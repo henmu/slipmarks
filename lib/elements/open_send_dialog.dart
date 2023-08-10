@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:slipmarks/helpers/constants.dart';
 import 'package:slipmarks/models/devices.dart';
 import 'package:slipmarks/services/auth_service.dart';
-import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
-import 'package:slipmarks/elements/stickyActionBarWrapper.dart';
 import 'package:slipmarks/models/bookmark.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:slipmarks/services/providers.dart';

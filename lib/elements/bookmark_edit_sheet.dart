@@ -5,7 +5,7 @@ import 'package:slipmarks/helpers/constants.dart';
 import 'package:slipmarks/services/auth_service.dart';
 import 'package:slipmarks/services/providers.dart';
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
-import 'package:slipmarks/elements/stickyActionBarWrapper.dart';
+import 'package:slipmarks/elements/sticky_action_bar_wrapper.dart';
 import 'package:slipmarks/models/bookmark.dart';
 import 'package:slipmarks/models/collections.dart';
 import 'package:http/http.dart' as http;
@@ -32,6 +32,18 @@ class BookmarkEditSheet {
     } else {
       // TODO: show an error in UI instead
       throw Exception('Failed to load temporary bookmarks');
+    }
+  }
+
+  Future<void> _deleteBookmark(
+      String bookmarkId, ProviderContainer container) async {
+    try {
+      await container.read(bookmarkDeletionProvider(bookmarkId).future);
+      // If successful, you can navigate back or close the bottom sheet
+      Navigator.of(context).pop();
+    } catch (e) {
+      print('Error deleting bookmark: $e');
+      // Show an error message to the user
     }
   }
 
@@ -147,10 +159,10 @@ class BookmarkEditSheet {
             const SizedBox(height: 16),
             // Delete button
             ElevatedButton(
-              onPressed: () {
-                // TODO: Add logic here to delete the bookmark
-                // and close the bottom sheet
-                Navigator.of(modalSheetContext).pop();
+              onPressed: () async {
+                final container = ProviderContainer();
+                await _deleteBookmark(bookmark.id!, container);
+                container.dispose(); // Dispose of the container after use
               },
               child: const Text('Delete Bookmark'),
             ),
