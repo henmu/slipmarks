@@ -5,6 +5,7 @@ import 'dart:convert';
 
 import 'package:slipmarks/models/bookmark.dart';
 import 'package:slipmarks/models/collections.dart';
+import 'package:slipmarks/models/devices.dart';
 
 import 'package:slipmarks/services/auth_service.dart';
 
@@ -84,5 +85,22 @@ final bookmarkDeletionProvider =
 
   if (response.statusCode != 204) {
     throw Exception('Failed to delete the bookmark');
+  }
+});
+
+final devicesProvider = FutureProvider<List<Devices>>((ref) async {
+  final url = Uri.parse("$SERVER_HOST/devices");
+  final accessToken = AuthService.instance.accessToken;
+  final response =
+      await http.get(url, headers: {'Authorization': 'Bearer $accessToken'});
+
+  if (response.statusCode == 200) {
+    final res = (json.decode(utf8.decode(response.bodyBytes)) as List)
+        .map((collectionJson) => Devices.fromJson(collectionJson))
+        .toList();
+
+    return res;
+  } else {
+    throw Exception('Failed to load collections');
   }
 });
