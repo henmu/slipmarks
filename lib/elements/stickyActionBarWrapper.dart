@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wolt_responsive_layout_grid/wolt_responsive_layout_grid.dart';
-import 'package:slipmarks/extensions/buildContextExtension.dart';
+import 'package:slipmarks/extensions/build_context_extension.dart';
 
 class StickyActionBarWrapper extends StatelessWidget {
   const StickyActionBarWrapper({
