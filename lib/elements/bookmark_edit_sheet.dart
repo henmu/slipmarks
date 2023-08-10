@@ -14,8 +14,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class BookmarkEditSheet {
   final Bookmark bookmark;
   final BuildContext context;
+  String newCollectionName = '';
 
-  const BookmarkEditSheet({required this.bookmark, required this.context});
+  BookmarkEditSheet({required this.bookmark, required this.context});
 
   Future<List<Collections>> fetchCollections() async {
     final url = Uri.parse("$SERVER_HOST/links");
@@ -35,12 +36,11 @@ class BookmarkEditSheet {
     }
   }
 
-  Future<void> _deleteBookmark(
-      String bookmarkId, ProviderContainer container) async {
+  Future<void> _deleteBookmark(String bookmarkId) async {
     try {
+      final container = ProviderContainer();
       await container.read(bookmarkDeletionProvider(bookmarkId).future);
-      // If successful, you can navigate back or close the bottom sheet
-      Navigator.of(context).pop();
+      container.dispose(); // Dispose of the container after use
     } catch (e) {
       print('Error deleting bookmark: $e');
       // Show an error message to the user
@@ -54,7 +54,7 @@ class BookmarkEditSheet {
 
     // Define a ValueNotifier for the selected collection in the DropdownButton
     final ValueNotifier<String?> collectionNotifier =
-        ValueNotifier<String?>('add_new_collection');
+        ValueNotifier<String?>('other');
 
     // Define a ValueNotifier for the favorite star
     final ValueNotifier<bool> favoriteNotifier = ValueNotifier<bool>(false);
@@ -71,10 +71,53 @@ class BookmarkEditSheet {
             ),
             const SizedBox(width: 8),
             ElevatedButton(
-              onPressed: () {
-                //Save bookmarks changes and close the bottom sheet
-                //TODO: Add logic here to save changes
-                Navigator.of(modalSheetContext).pop();
+              onPressed: () async {
+                final currentContext = modalSheetContext;
+
+                final ref = ProviderContainer();
+
+                if (newCollectionName.isNotEmpty) {
+                  try {
+                    final newCollectionId = await ref.read(
+                        newCollectionIdProvider(newCollectionName).future);
+                    final bookmarkId = bookmark.id;
+                    if (bookmarkId != null) {
+                      await ref.read(bookmarkAdditionProvider(
+                          BookmarkAdditionParameters(
+                              newCollectionId, bookmarkId)));
+
+                      Navigator.of(currentContext)
+                          .pop(); // Close the bottom sheet using stored context
+                    } else {
+                      print('Error: Bookmark ID is null');
+                    }
+                  } catch (e) {
+                    print(
+                        'Error creating or adding bookmark to new collection: $e');
+                  }
+                } else {
+                  final selectedCollectionId = collectionNotifier.value;
+
+                  if (selectedCollectionId != null) {
+                    try {
+                      final bookmarkId = bookmark.id;
+                      if (bookmarkId != null) {
+                        await ref.read(bookmarkAdditionProvider(
+                            BookmarkAdditionParameters(
+                                selectedCollectionId, bookmarkId)));
+
+                        Navigator.of(currentContext)
+                            .pop(); // Close the bottom sheet using stored context
+                      } else {
+                        print('Error: Bookmark ID is null');
+                      }
+                    } catch (e) {
+                      print('Error adding bookmark to existing collection: $e');
+                    }
+                  }
+                }
+
+                ref.dispose(); // Dispose of the container after use
               },
               child: const Text('Save'),
             ),
@@ -110,7 +153,8 @@ class BookmarkEditSheet {
                           // If the user selects the "Add New Collection" item,
                           // set selectedCollectionId to null to represent adding a new collection
                           if (value == 'add_new_collection') {
-                            value = null;
+                            _createNewCollection(
+                                context); // Show the dialog for creating a new collection
                           }
                           collectionNotifier.value = value;
                         },
@@ -118,8 +162,18 @@ class BookmarkEditSheet {
                           // Add the "Add New Collection" item at the beginning of the list
                           const DropdownMenuItem(
                             value: 'add_new_collection',
-                            child: Text('Add New Collection'),
+                            child: Text(
+                              'Add new collection',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
+                          const DropdownMenuItem(
+                            value: 'other',
+                            child: Text('Other'),
+                          ),
+
                           // Add other collections to the dropdown menu
                           ...collectionsList.map((collection) {
                             return DropdownMenuItem(
@@ -133,10 +187,10 @@ class BookmarkEditSheet {
                   );
                 },
                 error: (error, stackTrace) {
-                  return Text('Error loading collections');
+                  return const Text('Error loading collections');
                 },
                 loading: () {
-                  return CircularProgressIndicator();
+                  return const CircularProgressIndicator();
                 },
               );
             }),
@@ -161,7 +215,7 @@ class BookmarkEditSheet {
             ElevatedButton(
               onPressed: () async {
                 final container = ProviderContainer();
-                await _deleteBookmark(bookmark.id!, container);
+                await _deleteBookmark(bookmark.id!);
                 container.dispose(); // Dispose of the container after use
               },
               child: const Text('Delete Bookmark'),
@@ -169,6 +223,41 @@ class BookmarkEditSheet {
           ],
         ),
       ),
+    );
+  }
+
+  void _createNewCollection(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Create New Collection'),
+          content: TextField(
+            onChanged: (value) {
+              newCollectionName = value;
+            },
+            decoration: const InputDecoration(
+              labelText: 'Collection Name',
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(); // Close the dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (newCollectionName.isNotEmpty) {
+                  Navigator.of(dialogContext).pop();
+                }
+              },
+              child: const Text('Create'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

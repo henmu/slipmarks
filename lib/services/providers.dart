@@ -56,6 +56,73 @@ final collectionsProvider = FutureProvider<List<Collections>>((ref) async {
   }
 });
 
+Future<String> createNewCollection(String collectionName) async {
+  final url = Uri.parse("$SERVER_HOST/collections");
+  final accessToken = AuthService.instance.accessToken;
+  final response = await http.post(
+    url,
+    headers: {
+      'Authorization': 'Bearer $accessToken',
+      'Content-Type': 'application/json'
+    },
+    body: json.encode({'name': collectionName}),
+  );
+
+  if (response.statusCode == 201) {
+    final newCollectionId = json.decode(utf8.decode(response.bodyBytes))['id'];
+    return newCollectionId;
+  } else {
+    throw Exception('Failed to create new collection');
+  }
+}
+
+final newCollectionIdProvider =
+    FutureProviderFamily<String, String>((ref, collectionName) async {
+  final newCollectionId = await createNewCollection(collectionName);
+  return newCollectionId;
+});
+
+Future<bool> addBookmarkToCollection(
+    String collectionId, String? bookmarkId) async {
+  final url = Uri.parse("$SERVER_HOST/collections/$collectionId/bookmarks");
+  final accessToken = AuthService.instance.accessToken;
+
+  final response = await http.post(
+    url,
+    headers: {
+      'Authorization': 'Bearer $accessToken',
+      'Content-Type': 'application/json'
+    },
+    body: json.encode([collectionId, bookmarkId]),
+  );
+
+  if (response.statusCode == 200) {
+    // Bookmark added successfully
+    return true;
+  } else {
+    throw Exception('Failed to add bookmark to collection');
+  }
+}
+
+final bookmarkAdditionProvider =
+    FutureProviderFamily<void, BookmarkAdditionParameters>((ref, params) async {
+  final newCollectionId = params.collectionId;
+  final bookmarkId = params.bookmarkId;
+
+  final bookmarkAdded =
+      await addBookmarkToCollection(newCollectionId, bookmarkId);
+  if (!bookmarkAdded) {
+    throw Exception('Failed to add bookmark to the collection');
+  }
+});
+
+class BookmarkAdditionParameters {
+  final String collectionId;
+  final String? bookmarkId;
+
+  BookmarkAdditionParameters(this.collectionId, this.bookmarkId);
+}
+
 final bookmarksByCollectionProvider =
     FutureProviderFamily<List<Bookmark>, String>((ref, collectionId) async {
   final url = Uri.parse("$SERVER_HOST/collections/$collectionId/bookmarks");
