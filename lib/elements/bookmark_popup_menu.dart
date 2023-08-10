@@ -12,7 +12,11 @@ class BookmarkPopupMenu extends StatelessWidget {
         // Open your custom menu when tapped
         _showCustomPopupMenu(context);
       },
-      child: const Icon(Icons.more_horiz),
+      child: const Icon(
+        Icons.more_horiz,
+        color: Color(0xFFB1B1B1),
+        size: 20,
+      ),
     );
   }
 
@@ -63,10 +67,10 @@ class BookmarkPopupMenu extends StatelessWidget {
           ),
         ),
         const PopupMenuItem<String>(
-          value: 'remove',
+          value: 'delete',
           child: ListTile(
             contentPadding: EdgeInsets.all(0),
-            title: Text('Remove'),
+            title: Text('delete'),
           ),
         ),
       ],

@@ -283,9 +283,25 @@ class _LinksStateState extends ConsumerState<Links> {
                                                     // Handle "Favorite" action
                                                   } else if (choice == 'edit') {
                                                     // Handle "Edit" action
+                                                    WoltModalSheet.show<void>(
+                                                      context: context,
+                                                      pageListBuilder:
+                                                          (modalSheetContext) {
+                                                        return [
+                                                          BookmarkEditSheet(
+                                                            bookmark: link,
+                                                            context:
+                                                                modalSheetContext,
+                                                          ).editSheet(
+                                                              modalSheetContext),
+                                                        ];
+                                                      },
+                                                    );
                                                   } else if (choice ==
-                                                      'remove') {
+                                                      'delete') {
                                                     // Handle "Remove" action
+                                                    //TODO: Hide the SwipeableTile.card when remove is pressed
+                                                    _deleteBookmark(link.id!);
                                                   }
                                                 },
                                               ),
