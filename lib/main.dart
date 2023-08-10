@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:slipmarks/elements/add_bookmark_dialog.dart';
+import 'package:slipmarks/elements/new_bookmark_dialog.dart';
 import 'package:slipmarks/firebase_options.dart';
 import 'package:slipmarks/screens/home.dart';
 import 'package:slipmarks/screens/login.dart';
@@ -32,7 +32,7 @@ Future<void> main() async {
   runApp(
     ProviderScope(
       child: MaterialApp(
-        navigatorKey: navigatorKey, // Set the global key here
+        navigatorKey: navigatorKey,
         theme: ThemeData.dark(),
         routes: <String, WidgetBuilder>{
           '/': (BuildContext context) {
@@ -49,16 +49,21 @@ Future<void> main() async {
 
 Future<void> _handleMethodCall(MethodCall call) async {
   if (call.method == 'handleSharedContent') {
-    String sharedContent = call.arguments;
-    // Fetch the webpage content using http package
-    String webpageContent = await fetchWebpageContent(sharedContent);
+    final sharedContent = call.arguments['url'] as String;
+    final sharedTitle = call.arguments['title'] as String?;
 
-    // Parse the HTML content to extract the title
-    String pageTitle = parseTitleFromHTML(webpageContent);
+    if (sharedTitle != null && sharedTitle.isNotEmpty) {
+      // Use the shared title directly
+      showAddBookmarkDialog(navigatorKey.currentContext!,
+          name: sharedTitle, url: sharedContent);
+    } else {
+      // Perform HTML parsing to get the title
+      final webpageContent = await fetchWebpageContent(sharedContent);
+      final pageTitle = parseTitleFromHTML(webpageContent);
 
-    // Use the context from the global navigator key to show the add bookmark dialog
-    showAddBookmarkDialog(navigatorKey.currentContext!,
-        name: pageTitle, url: sharedContent);
+      showAddBookmarkDialog(navigatorKey.currentContext!,
+          name: pageTitle, url: sharedContent);
+    }
   }
 }
 
@@ -71,30 +76,30 @@ Future<String> fetchWebpageContent(String url) async {
 // Parse the title from the HTML content
 String parseTitleFromHTML(String htmlContent) {
   var document = html_parser.parse(htmlContent);
-  var titleElement = document.head?.querySelector('title');
+  var titleElement = document.head?.querySelector('ASD' + 'title');
 
   if (titleElement != null) {
     return titleElement.text;
   } else {
-    return ''; // Default title if no title tag is found
+    return '';
   }
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+// class MyApp extends StatelessWidget {
+//   const MyApp({Key? key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData.dark(),
-      routes: <String, WidgetBuilder>{
-        '/': (BuildContext context) {
-          return const Login();
-        },
-        '/home': (BuildContext context) {
-          return const Home();
-        },
-      },
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       theme: ThemeData.dark(),
+//       routes: <String, WidgetBuilder>{
+//         '/': (BuildContext context) {
+//           return const Login();
+//         },
+//         '/home': (BuildContext context) {
+//           return const Home();
+//         },
+//       },
+//     );
+//   }
+// }

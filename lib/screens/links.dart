@@ -296,7 +296,6 @@ class _LinksStateState extends ConsumerState<Links> {
                                                     // Handle "Favorite" action
                                                   } else if (choice == 'edit') {
                                                     // Show a dialog with a text field for the new bookmark name
-
                                                     //TODO: Refresh when success response from server
                                                     showDialog(
                                                       context: context,

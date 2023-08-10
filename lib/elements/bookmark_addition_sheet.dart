@@ -12,7 +12,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 //TODO: When creating new collection add it to the list temporarily or change dropdown menus text to that, without adding to the list.
-//TODO: When renaminng update bookmarks name too.
+//TODO: When adding bookmark check if name was edit and if yes then update bookmarks name too.
 class BookmarkEditSheet {
   final Bookmark bookmark;
   final BuildContext context;
