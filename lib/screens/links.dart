@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:slipmarks/elements/add_bookmark_dialog.dart';
+import 'package:slipmarks/elements/bookmark_popup_menu.dart';
 import 'package:slipmarks/elements/open_send_dialog.dart';
 
 import 'package:slipmarks/models/bookmark.dart';
 import 'package:slipmarks/services/providers.dart';
 
 import 'package:swipeable_tile/swipeable_tile.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 import 'package:slipmarks/elements/bookmarkEditSheet.dart';
@@ -15,13 +15,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-
-Future<void> _launchURL(String url) async {
-  Uri parsedUrl = Uri.parse(url);
-  if (!await launchUrl(parsedUrl, mode: LaunchMode.externalApplication)) {
-    throw 'Could not launch $parsedUrl';
-  }
-}
 
 class Links extends ConsumerStatefulWidget {
   const Links({super.key});
@@ -151,20 +144,7 @@ class _LinksStateState extends ConsumerState<Links> {
                         itemBuilder: (context, index) {
                           final link = bookmarks[index];
                           return GestureDetector(
-                            // onTap: () => _launchURL(link.url),
                             onTap: () {
-                              // WoltModalSheet.show<void>(
-                              //   context: context,
-                              //   pageListBuilder: (modalSheetContext) {
-                              //     return [
-                              //       OpenAndSendSheet(
-                              //         bookmark: link,
-                              //         context: modalSheetContext,
-                              //       ).openAndSendSheet(modalSheetContext),
-                              //     ];
-                              //   },
-                              // );
-                              // Create an instance of OpenAndSendSheet and open the dialog
                               final openAndSendDialog = OpenAndSendDialog(
                                   bookmark: link, context: context);
                               openAndSendDialog.openAndSendDialog();
@@ -173,7 +153,7 @@ class _LinksStateState extends ConsumerState<Links> {
                               borderRadius: 10,
                               color: const Color(0xFF282828),
                               key: UniqueKey(),
-                              swipeThreshold: 0.9,
+                              swipeThreshold: 0.7,
                               direction: SwipeDirection.horizontal,
                               onSwiped: (direction) {
                                 if (direction == SwipeDirection.startToEnd) {
@@ -277,15 +257,39 @@ class _LinksStateState extends ConsumerState<Links> {
                                                   fontSize: 12),
                                             ),
                                             //Triple dot
-                                            const Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 8),
-                                              child: Icon(
-                                                Icons.more_horiz,
-                                                color: Color(0xFFB1B1B1),
-                                                size: 18,
+                                            // const Padding(
+                                            //   padding: EdgeInsets.symmetric(
+                                            //       horizontal: 8),
+                                            //   child: Icon(
+                                            //     Icons.more_horiz,
+                                            //     color: Color(0xFFB1B1B1),
+                                            //     size: 18,
+                                            //   ),
+                                            // ),
+                                            // Triple dot menu
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 8),
+                                              child: BookmarkPopupMenu(
+                                                onItemSelected:
+                                                    (String choice) {
+                                                  if (choice == 'details') {
+                                                    // Handle "Details" action
+                                                  } else if (choice == 'add') {
+                                                    // Handle "Add" action
+                                                  } else if (choice ==
+                                                      'favorite') {
+                                                    // Handle "Favorite" action
+                                                  } else if (choice == 'edit') {
+                                                    // Handle "Edit" action
+                                                  } else if (choice ==
+                                                      'remove') {
+                                                    // Handle "Remove" action
+                                                  }
+                                                },
                                               ),
-                                            )
+                                            ),
                                           ],
                                         ),
                                       ],
