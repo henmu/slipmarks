@@ -60,6 +60,27 @@ final bookmarkNameUpdateProvider =
   },
 );
 
+final collectionNameUpdateProvider =
+    FutureProviderFamily<void, BookmarkUpdateParameters>(
+  (ref, params) async {
+    final url = Uri.parse('$SERVER_HOST/collections/${params.bookmarkId}');
+    final accessToken = AuthService.instance.accessToken;
+
+    final response = await http.patch(
+      url,
+      headers: {
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({'name': params.newName}),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update the collection name');
+    }
+  },
+);
+
 class BookmarkUpdateParameters {
   final String? bookmarkId;
   final String newName;

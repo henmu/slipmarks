@@ -11,7 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 //TODO: Refresh collectionsBookmarks somehow
-//TODO: Add collection edit, fix deletion to update UI even if collection is open.
+//TODO: Add collection edit/remove
 class Bookmarks extends ConsumerWidget {
   // Store the collection expansion state using a Set
   final Set<String> expandedCollections = {};
@@ -103,14 +103,65 @@ class Bookmarks extends ConsumerWidget {
                           onItemSelected: (String choice) {
                             if (choice == 'edit') {
                               // Handle "Edit" action
+                              //TODO: Refresh when success response from server
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext dialogContext) {
+                                  TextEditingController newNameController =
+                                      TextEditingController();
+                                  return AlertDialog(
+                                    title: const Text('Edit Folders Name'),
+                                    content: TextField(
+                                      controller: newNameController,
+                                      decoration: const InputDecoration(
+                                          labelText: 'New Folders Name'),
+                                    ),
+                                    actions: <Widget>[
+                                      ElevatedButton(
+                                        child: const Text('Cancel'),
+                                        onPressed: () {
+                                          Navigator.of(dialogContext).pop();
+                                        },
+                                      ),
+                                      ElevatedButton(
+                                        child: const Text('Save'),
+                                        onPressed: () async {
+                                          String newCollectionName =
+                                              newNameController.text;
+                                          if (newCollectionName.isNotEmpty) {
+                                            try {
+                                              // Call the provider to update the bookmark name
+                                              final bookmarkUpdateParams =
+                                                  BookmarkUpdateParameters(
+                                                      collection.id,
+                                                      newCollectionName);
+                                              await ref.read(
+                                                  collectionNameUpdateProvider(
+                                                          bookmarkUpdateParams)
+                                                      .future);
+                                              Navigator.of(dialogContext)
+                                                  .pop(); // Close the dialog
+                                            } catch (error) {
+                                              print(
+                                                  'Failed to update bookmark name: $error');
+                                              // Handle the error, e.g., show an error message to the user
+                                            }
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
                             } else if (choice == 'delete') {
                               // Handle "Remove" action
                               print('Deletion of collection sent');
                               try {
                                 ref.read(
                                     collectionDeletionProvider(collection.id));
+                                ref.refresh(collectionProvider);
                               } catch (e) {
-                                print('Error deleting collection: $e');
+                                print('Error deleting bookmark: $e');
                                 // Show an error message to the user
                               }
                             }
