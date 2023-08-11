@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:slipmarks/elements/filter_dropdown_button.dart';
 import 'package:slipmarks/elements/new_bookmark_dialog.dart';
 import 'package:slipmarks/elements/bookmark_popup_menu.dart';
 import 'package:slipmarks/elements/open_send_dialog.dart';
@@ -112,27 +113,12 @@ class _LinksStateState extends ConsumerState<Links> {
                       //Filter Text
                       const Text('All', style: TextStyle(color: Colors.white)),
                       const SizedBox(width: 8),
-                      // Text(selectedFilter,
-                      //     style: const TextStyle(color: Colors.white)),
-                      //Dropdown arrow icon
-                      DropdownButton<String>(
-                        value: selectedFilter,
-                        onChanged: (newValue) {
-                          if (newValue != null) {
-                            updateFilter(newValue);
-                          }
+                      FilterDropDown(
+                        options: filterOptions,
+                        selectedOption: selectedFilter,
+                        onOptionSelected: (newValue) {
+                          updateFilter(newValue);
                         },
-                        icon: const Icon(
-                          Icons.arrow_drop_down,
-                          color: Colors.white,
-                        ),
-                        items: filterOptions
-                            .map<DropdownMenuItem<String>>((String option) {
-                          return DropdownMenuItem<String>(
-                            value: option,
-                            child: Text(option),
-                          );
-                        }).toList(),
                       )
                     ],
                   ),
