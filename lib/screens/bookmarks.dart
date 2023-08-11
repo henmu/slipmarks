@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:slipmarks/elements/bookmark_addition_sheet.dart';
+import 'package:slipmarks/elements/bookmark_popup_menu.dart';
+import 'package:slipmarks/elements/open_send_dialog.dart';
+import 'package:slipmarks/helpers/datetime_helper.dart';
 import 'package:slipmarks/services/providers.dart';
 import 'package:swipeable_tile/swipeable_tile.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
-
-Future<void> _launchURL(String url) async {
-  Uri parsedUrl = Uri.parse(url);
-  if (!await launchUrl(parsedUrl)) {
-    throw 'Could not launch $parsedUrl';
-  }
-}
 
 //TODO: Refresh collectionsBookmarks somehow
 //TODO: Add collection edit/remove
@@ -50,12 +46,15 @@ class Bookmarks extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         body: collectionsAsyncValue.when(
           data: (collections) {
+            //Sort collections alphabetically
+            collections.sort(
+              (a, b) => a.name.compareTo(b.name),
+            );
             return ListView.builder(
               itemCount: collections.length,
               itemBuilder: (context, index) {
                 final collection = collections[index];
                 final isExpanded = expandedCollections.contains(collection.id);
-
                 return Column(
                   children: [
                     GestureDetector(
@@ -65,6 +64,8 @@ class Bookmarks extends ConsumerWidget {
                           expandedCollections.remove(collection.id);
                         } else {
                           expandedCollections.add(collection.id);
+                          ref.refresh(
+                              bookmarksByCollectionProvider(collection.id));
                         }
                         // Refresh the UI after updating the expansion state
                         ref.refresh(collectionsProvider);
@@ -89,9 +90,23 @@ class Bookmarks extends ConsumerWidget {
                             ),
                           ],
                         ),
-                        trailing: const Icon(
-                          Icons.more_horiz,
-                          color: Color(0xFFB1B1B1),
+                        trailing: BookmarkPopupMenu(
+                          icon: Icons.more_vert,
+                          iconColor: const Color(0xFFB1B1B1),
+                          iconSize: 24,
+                          menuItems: [
+                            // PopupMenuItemInfo(
+                            //     label: 'Details', value: 'details'),
+                            PopupMenuItemInfo(label: 'Edit', value: 'edit'),
+                            PopupMenuItemInfo(label: 'Delete', value: 'delete'),
+                          ],
+                          onItemSelected: (String choice) {
+                            if (choice == 'edit') {
+                              // Handle "Edit" action
+                            } else if (choice == 'delete') {
+                              // Handle "Remove" action
+                            }
+                          },
                         ),
                       ),
                     ),
@@ -120,20 +135,26 @@ class Bookmarks extends ConsumerWidget {
         ref.watch(bookmarksByCollectionProvider(collectionId));
     return bookmarksAsyncValue.when(
       data: (bookmarks) {
+        //Sort Bookmarks from newest to oldest
+        bookmarks.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
         return [
           ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: bookmarks.length,
             itemBuilder: (context, index) {
-              final bookmark = bookmarks[index];
+              final link = bookmarks[index];
               return GestureDetector(
-                onTap: () => _launchURL(bookmark.url),
+                onTap: () {
+                  final openAndSendDialog =
+                      OpenAndSendDialog(bookmark: link, context: context);
+                  openAndSendDialog.openAndSendDialog();
+                },
                 child: SwipeableTile.card(
                   borderRadius: 10,
                   color: const Color(0xFF282828),
                   key: UniqueKey(),
-                  swipeThreshold: 0.9,
+                  swipeThreshold: 0.7,
                   direction: SwipeDirection.horizontal,
                   onSwiped: (direction) {
                     if (direction == SwipeDirection.startToEnd) {
@@ -143,7 +164,7 @@ class Bookmarks extends ConsumerWidget {
                         pageListBuilder: (modalSheetContext) {
                           return [
                             BookmarkEditSheet(
-                              bookmark: bookmark,
+                              bookmark: link,
                               context: modalSheetContext,
                             ).editSheet(modalSheetContext),
                           ];
@@ -151,6 +172,12 @@ class Bookmarks extends ConsumerWidget {
                       );
                     } else if (direction == SwipeDirection.endToStart) {
                       // Handle right to left swipe (Delete)
+                      try {
+                        ref.read(bookmarkDeletionProvider(link.id!));
+                      } catch (e) {
+                        print('Error deleting bookmark: $e');
+                        // Show an error message to the user
+                      }
                     }
                   },
                   backgroundBuilder: (context, direction, progress) {
@@ -178,7 +205,7 @@ class Bookmarks extends ConsumerWidget {
                         padding: const EdgeInsets.symmetric(
                             vertical: 9, horizontal: 11),
                         child: FutureBuilder<Widget>(
-                          future: _fetchFavicon(bookmark.iconUrl),
+                          future: _fetchFavicon(link.iconUrl),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
@@ -195,38 +222,143 @@ class Bookmarks extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Bookmark title
+                            //Links title
                             Padding(
                               padding: const EdgeInsets.only(top: 12),
                               child: Text(
-                                bookmark.name,
-                                // style: const TextStyle(color: Colors.white),
+                                link.name,
                                 overflow: TextOverflow.clip,
                                 maxLines: 1,
                               ),
                             ),
-                            // Bookmark URL
+                            //Links URL
                             Padding(
                               padding: const EdgeInsets.only(right: 1),
                               child: Text(
-                                bookmark.url,
+                                link.url,
                                 style: const TextStyle(
                                     color: Color(0xFF979797), fontSize: 12),
                                 overflow: TextOverflow.clip,
                                 maxLines: 1,
                               ),
                             ),
-                            // Footer
-                            const Row(
+                            //Footer
+                            Row(
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
-                                // Triple dot
+                                //Timestamp
+                                Text(
+                                  DateTimeHelper.formatDateTime(link.createdAt),
+                                  textAlign: TextAlign.end,
+                                  style: const TextStyle(
+                                      color: Color(0xFFB1B1B1), fontSize: 12),
+                                ),
+                                // Triple dot menu
                                 Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 8),
-                                  child: Icon(
-                                    Icons.more_horiz,
-                                    color: Color(0xFFB1B1B1),
-                                    size: 18,
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8),
+                                  child: BookmarkPopupMenu(
+                                    icon: Icons.more_horiz,
+                                    iconColor: const Color(0xFFB1B1B1),
+                                    iconSize: 20,
+                                    menuItems: [
+                                      PopupMenuItemInfo(
+                                          label: 'Details', value: 'details'),
+                                      PopupMenuItemInfo(
+                                          label: 'Add', value: 'add'),
+                                      PopupMenuItemInfo(
+                                          label: 'Edit', value: 'edit'),
+                                      PopupMenuItemInfo(
+                                          label: 'Delete', value: 'delete'),
+                                    ],
+                                    onItemSelected: (String choice) {
+                                      if (choice == 'details') {
+                                        // Handle "Details" action
+                                      } else if (choice == 'add') {
+                                        // Handle "Add" action
+                                        WoltModalSheet.show<void>(
+                                          context: context,
+                                          pageListBuilder: (modalSheetContext) {
+                                            return [
+                                              BookmarkEditSheet(
+                                                bookmark: link,
+                                                context: modalSheetContext,
+                                              ).editSheet(modalSheetContext),
+                                            ];
+                                          },
+                                        );
+                                      } else if (choice == 'edit') {
+                                        // Show a dialog with a text field for the new bookmark name
+                                        //TODO: Refresh when success response from server
+                                        showDialog(
+                                          context: context,
+                                          builder:
+                                              (BuildContext dialogContext) {
+                                            TextEditingController
+                                                newNameController =
+                                                TextEditingController();
+                                            return AlertDialog(
+                                              title: const Text(
+                                                  'Edit Bookmark Name'),
+                                              content: TextField(
+                                                controller: newNameController,
+                                                decoration:
+                                                    const InputDecoration(
+                                                        labelText:
+                                                            'New Bookmark Name'),
+                                              ),
+                                              actions: <Widget>[
+                                                ElevatedButton(
+                                                  child: const Text('Cancel'),
+                                                  onPressed: () {
+                                                    Navigator.of(dialogContext)
+                                                        .pop();
+                                                  },
+                                                ),
+                                                ElevatedButton(
+                                                  child: const Text('Save'),
+                                                  onPressed: () async {
+                                                    String newBookmarkName =
+                                                        newNameController.text;
+                                                    if (newBookmarkName
+                                                        .isNotEmpty) {
+                                                      try {
+                                                        // Call the provider to update the bookmark name
+                                                        final bookmarkUpdateParams =
+                                                            BookmarkUpdateParameters(
+                                                                link.id,
+                                                                newBookmarkName);
+                                                        await ref.read(
+                                                            bookmarkNameUpdateProvider(
+                                                                    bookmarkUpdateParams)
+                                                                .future);
+                                                        Navigator.of(
+                                                                dialogContext)
+                                                            .pop(); // Close the dialog
+                                                      } catch (error) {
+                                                        print(
+                                                            'Failed to update bookmark name: $error');
+                                                        // Handle the error, e.g., show an error message to the user
+                                                      }
+                                                    }
+                                                  },
+                                                ),
+                                              ],
+                                            );
+                                          },
+                                        );
+                                      } else if (choice == 'delete') {
+                                        // Handle "Remove" action
+                                        //TODO: Hide the SwipeableTile.card when remove is pressed
+                                        try {
+                                          ref.read(bookmarkDeletionProvider(
+                                              link.id!));
+                                        } catch (e) {
+                                          print('Error deleting bookmark: $e');
+                                          // Show an error message to the user
+                                        }
+                                      }
+                                    },
                                   ),
                                 ),
                               ],

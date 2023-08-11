@@ -3,9 +3,18 @@ import 'package:flutter/material.dart';
 class BookmarkPopupMenu extends StatelessWidget {
   final List<PopupMenuItemInfo> menuItems;
   final Function(String) onItemSelected;
+  final IconData icon;
+  final Color iconColor;
+  final double iconSize;
 
-  const BookmarkPopupMenu(
-      {super.key, required this.onItemSelected, required this.menuItems});
+  const BookmarkPopupMenu({
+    super.key,
+    required this.onItemSelected,
+    required this.menuItems,
+    required this.icon,
+    this.iconColor = const Color(0xFFFFFFFF),
+    this.iconSize = 20.0,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -14,10 +23,10 @@ class BookmarkPopupMenu extends StatelessWidget {
         // Open your custom menu when tapped
         _showCustomPopupMenu(context);
       },
-      child: const Icon(
-        Icons.more_horiz,
-        color: Color(0xFFB1B1B1),
-        size: 20,
+      child: Icon(
+        icon,
+        color: iconColor,
+        size: iconSize,
       ),
     );
   }

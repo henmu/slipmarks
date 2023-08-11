@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:slipmarks/elements/new_bookmark_dialog.dart';
 import 'package:slipmarks/elements/bookmark_popup_menu.dart';
 import 'package:slipmarks/elements/open_send_dialog.dart';
+import 'package:slipmarks/helpers/datetime_helper.dart';
 
 import 'package:slipmarks/models/bookmark.dart';
 import 'package:slipmarks/services/providers.dart';
@@ -70,16 +71,6 @@ class _LinksStateState extends ConsumerState<Links> {
     }
   }
 
-  String _formatDateTime(String? timestamp) {
-    if (timestamp == null) return 'Unknown';
-
-    final dateTime = DateTime.tryParse(timestamp);
-    if (dateTime == null) return 'Invalid Date';
-
-    final formatter = DateFormat('dd/MM HH:mm');
-    return formatter.format(dateTime);
-  }
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -134,6 +125,9 @@ class _LinksStateState extends ConsumerState<Links> {
                     ref.watch(bookmarksFutureProvider);
                 return bookmarksAsyncValue.when(
                   data: (bookmarks) {
+                    //Sort Bookmarks from newest to oldest
+                    bookmarks
+                        .sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
                     return RefreshIndicator(
                       onRefresh: () async {
                         ref.refresh(bookmarksFutureProvider);
@@ -249,28 +243,24 @@ class _LinksStateState extends ConsumerState<Links> {
                                           children: [
                                             //Timestamp
                                             Text(
-                                              _formatDateTime(link.createdAt),
+                                              DateTimeHelper.formatDateTime(
+                                                  link.createdAt),
+                                              // _formatDateTime(link.createdAt),
                                               textAlign: TextAlign.end,
                                               style: const TextStyle(
                                                   color: Color(0xFFB1B1B1),
                                                   fontSize: 12),
                                             ),
-                                            //Triple dot
-                                            // const Padding(
-                                            //   padding: EdgeInsets.symmetric(
-                                            //       horizontal: 8),
-                                            //   child: Icon(
-                                            //     Icons.more_horiz,
-                                            //     color: Color(0xFFB1B1B1),
-                                            //     size: 18,
-                                            //   ),
-                                            // ),
                                             // Triple dot menu
                                             Padding(
                                               padding:
                                                   const EdgeInsets.symmetric(
                                                       horizontal: 8),
                                               child: BookmarkPopupMenu(
+                                                icon: Icons.more_horiz,
+                                                iconColor:
+                                                    const Color(0xFFB1B1B1),
+                                                iconSize: 20,
                                                 menuItems: [
                                                   PopupMenuItemInfo(
                                                       label: 'Details',
@@ -278,9 +268,6 @@ class _LinksStateState extends ConsumerState<Links> {
                                                   PopupMenuItemInfo(
                                                       label: 'Add',
                                                       value: 'add'),
-                                                  PopupMenuItemInfo(
-                                                      label: 'Favorite',
-                                                      value: 'favorite'),
                                                   // PopupMenuItemInfo(
                                                   //     label: 'Edit',
                                                   //     value: 'edit'),
@@ -308,9 +295,6 @@ class _LinksStateState extends ConsumerState<Links> {
                                                         ];
                                                       },
                                                     );
-                                                  } else if (choice ==
-                                                      'favorite') {
-                                                    // Handle "Favorite" action
                                                   }
                                                   // else if (choice == 'edit') {
                                                   //   // Show a dialog with a text field for the new bookmark name
