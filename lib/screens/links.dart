@@ -25,6 +25,9 @@ class Links extends ConsumerStatefulWidget {
 
 class _LinksStateState extends ConsumerState<Links> {
   String selectedFilter = '7d'; // Default filter
+  bool sortByNewest = true; // Default sorting order
+  IconData sortIcon = Icons.sort;
+  List<Bookmark> bookmarks = [];
 
   // Options for filter
   List<String> filterOptions = ['1d', '3d', '7d', '14d'];
@@ -102,20 +105,34 @@ class _LinksStateState extends ConsumerState<Links> {
                           ))
                     ],
                   ),
-                  Row(
-                    children: [
-                      //Sort icon
-                      IconButton(
-                        icon: const Icon(
-                          Icons.sort,
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        sortByNewest = !sortByNewest;
+                        sortIcon = sortByNewest
+                            ? Icons.arrow_downward
+                            : Icons.arrow_upward;
+                        if (sortByNewest) {
+                          bookmarks.sort(
+                              (a, b) => b.createdAt!.compareTo(a.createdAt!));
+                        } else {
+                          bookmarks.sort(
+                              (a, b) => a.createdAt!.compareTo(b.createdAt!));
+                        }
+                      });
+                    },
+                    child: Row(
+                      children: [
+                        const Text('Sort'),
+                        const SizedBox(width: 4),
+                        Icon(
+                          sortIcon,
+                          size: 18,
                           color: Colors.white,
                         ),
-                        onPressed: () {
-                          //Implement sorting logic
-                        },
-                      )
-                    ],
-                  )
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -124,10 +141,15 @@ class _LinksStateState extends ConsumerState<Links> {
                 final AsyncValue<List<Bookmark>> bookmarksAsyncValue =
                     ref.watch(bookmarksFutureProvider);
                 return bookmarksAsyncValue.when(
-                  data: (bookmarks) {
+                  data: (bookmarksData) {
                     //Sort Bookmarks from newest to oldest
-                    bookmarks
-                        .sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+                    bookmarks = bookmarksData;
+                    if (!sortByNewest) {
+                      // If sorting order is oldest to newest, reverse the list
+                      bookmarks = bookmarks.reversed.toList();
+                    }
+                    // bookmarks
+                    //     .sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
                     return RefreshIndicator(
                       onRefresh: () async {
                         ref.refresh(bookmarksFutureProvider);
