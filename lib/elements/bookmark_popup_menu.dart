@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 class BookmarkPopupMenu extends StatelessWidget {
+  final List<PopupMenuItemInfo> menuItems;
   final Function(String) onItemSelected;
 
-  const BookmarkPopupMenu({super.key, required this.onItemSelected});
+  const BookmarkPopupMenu(
+      {super.key, required this.onItemSelected, required this.menuItems});
 
   @override
   Widget build(BuildContext context) {
@@ -37,43 +39,15 @@ class BookmarkPopupMenu extends StatelessWidget {
     showMenu<String>(
       context: context,
       position: position,
-      items: <PopupMenuEntry<String>>[
-        const PopupMenuItem<String>(
-          value: 'details',
+      items: menuItems.map((item) {
+        return PopupMenuItem<String>(
+          value: item.value,
           child: ListTile(
-            contentPadding: EdgeInsets.all(0),
-            title: Text('Details'),
+            contentPadding: const EdgeInsets.all(0),
+            title: Text(item.label),
           ),
-        ),
-        const PopupMenuItem<String>(
-          value: 'add',
-          child: ListTile(
-            contentPadding: EdgeInsets.all(0),
-            title: Text('Add'),
-          ),
-        ),
-        const PopupMenuItem<String>(
-          value: 'favorite',
-          child: ListTile(
-            contentPadding: EdgeInsets.all(0),
-            title: Text('Favorite'),
-          ),
-        ),
-        const PopupMenuItem<String>(
-          value: 'edit',
-          child: ListTile(
-            contentPadding: EdgeInsets.all(0),
-            title: Text('Edit'),
-          ),
-        ),
-        const PopupMenuItem<String>(
-          value: 'delete',
-          child: ListTile(
-            contentPadding: EdgeInsets.all(0),
-            title: Text('delete'),
-          ),
-        ),
-      ],
+        );
+      }).toList(),
     ).then(
       (value) {
         if (value != null) {
@@ -82,4 +56,14 @@ class BookmarkPopupMenu extends StatelessWidget {
       },
     );
   }
+}
+
+class PopupMenuItemInfo {
+  final String label;
+  final String value;
+
+  PopupMenuItemInfo({
+    required this.label,
+    required this.value,
+  });
 }

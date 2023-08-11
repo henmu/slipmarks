@@ -126,8 +126,8 @@ class BookmarkEditSheet {
           ],
         ),
       ),
-      pageTitle: const Text('Edit Bookmark'),
-      topBarTitle: const Text('Edit Bookmark'),
+      pageTitle: const Text('Save Link'),
+      topBarTitle: const Text('Save Link'),
       closeButton: CloseButton(onPressed: Navigator.of(modalSheetContext).pop),
       mainContentPadding: const EdgeInsetsDirectional.all(16),
       child: Padding(
