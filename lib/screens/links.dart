@@ -25,17 +25,37 @@ class Links extends ConsumerStatefulWidget {
 
 class _LinksStateState extends ConsumerState<Links> {
   String selectedFilter = '7d'; // Default filter
-  bool sortByNewest = true; // Default sorting order
+  bool sortByNewest = false; // Default sorting order
   IconData sortIcon = Icons.sort;
   List<Bookmark> bookmarks = [];
 
   // Options for filter
+  List<Bookmark> filteredBookmarks = [];
+  List<int> filterDurations = [1, 3, 7, 14];
   List<String> filterOptions = ['1d', '3d', '7d', '14d'];
+
+  DateTime parseCreatedAt(String createdAt) {
+    return DateFormat('yyyy-MM-dd HH:mm:ss.SSSSSS').parse(createdAt, true);
+  }
+
+  List<Bookmark> filterBookmarks(List<Bookmark> bookmarks, int days) {
+    final DateTime currentDate = DateTime.now();
+    final DateTime filterDate = currentDate.subtract(Duration(days: days));
+
+    return bookmarks.where((bookmark) {
+      final createdAt = parseCreatedAt(bookmark.createdAt!);
+      return createdAt.isAfter(filterDate);
+    }).toList();
+  }
 
   // Function to update the selected filter
   void updateFilter(String filter) {
+    int days = filterDurations[filterOptions.indexOf(filter)];
+    List<Bookmark> filteredBookmarks = filterBookmarks(bookmarks, days);
+
     setState(() {
       selectedFilter = filter;
+      this.filteredBookmarks = filteredBookmarks;
     });
   }
 
@@ -92,17 +112,28 @@ class _LinksStateState extends ConsumerState<Links> {
                       //Filter Text
                       const Text('All', style: TextStyle(color: Colors.white)),
                       const SizedBox(width: 8),
-                      Text(selectedFilter,
-                          style: const TextStyle(color: Colors.white)),
+                      // Text(selectedFilter,
+                      //     style: const TextStyle(color: Colors.white)),
                       //Dropdown arrow icon
-                      IconButton(
-                          onPressed: () {
-                            //Handle press
-                          },
-                          icon: const Icon(
-                            Icons.arrow_drop_down,
-                            color: Colors.white,
-                          ))
+                      DropdownButton<String>(
+                        value: selectedFilter,
+                        onChanged: (newValue) {
+                          if (newValue != null) {
+                            updateFilter(newValue);
+                          }
+                        },
+                        icon: const Icon(
+                          Icons.arrow_drop_down,
+                          color: Colors.white,
+                        ),
+                        items: filterOptions
+                            .map<DropdownMenuItem<String>>((String option) {
+                          return DropdownMenuItem<String>(
+                            value: option,
+                            child: Text(option),
+                          );
+                        }).toList(),
+                      )
                     ],
                   ),
                   GestureDetector(
@@ -148,16 +179,25 @@ class _LinksStateState extends ConsumerState<Links> {
                       // If sorting order is oldest to newest, reverse the list
                       bookmarks = bookmarks.reversed.toList();
                     }
-                    // bookmarks
-                    //     .sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+                    // Filter bookmarks based on the selected filter
+                    int days =
+                        filterDurations[filterOptions.indexOf(selectedFilter)];
+                    filteredBookmarks = filterBookmarks(bookmarks, days);
+
+                    // Print all items in filteredBookmarks for debugging
+                    print('Filtered Bookmarks:');
+                    for (var bookmark in filteredBookmarks) {
+                      print(bookmark.name);
+                    }
+
                     return RefreshIndicator(
                       onRefresh: () async {
                         ref.refresh(bookmarksFutureProvider);
                       },
                       child: ListView.builder(
-                        itemCount: bookmarks.length,
+                        itemCount: filteredBookmarks.length,
                         itemBuilder: (context, index) {
-                          final link = bookmarks[index];
+                          final link = filteredBookmarks[index];
                           return GestureDetector(
                             onTap: () {
                               final openAndSendDialog = OpenAndSendDialog(
