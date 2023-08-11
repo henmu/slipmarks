@@ -11,7 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:wolt_modal_sheet/wolt_modal_sheet.dart';
 
 //TODO: Refresh collectionsBookmarks somehow
-//TODO: Add collection edit/remove
+//TODO: Add collection edit, fix deletion to update UI even if collection is open.
 class Bookmarks extends ConsumerWidget {
   // Store the collection expansion state using a Set
   final Set<String> expandedCollections = {};
@@ -109,8 +109,6 @@ class Bookmarks extends ConsumerWidget {
                               try {
                                 ref.read(
                                     collectionDeletionProvider(collection.id));
-                                // Remove the collection from expandedCollections if it's expanded
-                                expandedCollections.remove(collection.id);
                               } catch (e) {
                                 print('Error deleting collection: $e');
                                 // Show an error message to the user
