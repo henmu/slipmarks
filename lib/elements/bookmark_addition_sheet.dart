@@ -143,7 +143,7 @@ class BookmarkEditSheet {
             // Dropdown menu for collection
             Consumer(builder: (context, ref, _) {
               final AsyncValue<List<Collections>> collectionsAsyncValue =
-                  ref.watch(collectionsProvider);
+                  ref.watch(collectionProvider);
               return collectionsAsyncValue.when(
                 data: (collectionsList) {
                   return ValueListenableBuilder<String?>(

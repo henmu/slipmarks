@@ -39,7 +39,7 @@ class Bookmarks extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final collectionsAsyncValue = ref.watch(collectionsProvider);
+    final collectionsAsyncValue = ref.watch(collectionProvider);
 
     return SafeArea(
       child: Scaffold(
@@ -68,7 +68,7 @@ class Bookmarks extends ConsumerWidget {
                               bookmarksByCollectionProvider(collection.id));
                         }
                         // Refresh the UI after updating the expansion state
-                        ref.refresh(collectionsProvider);
+                        ref.refresh(collectionProvider);
                       },
                       child: ListTile(
                         leading: const Icon(
@@ -105,6 +105,16 @@ class Bookmarks extends ConsumerWidget {
                               // Handle "Edit" action
                             } else if (choice == 'delete') {
                               // Handle "Remove" action
+                              print('Deletion of collection sent');
+                              try {
+                                ref.read(
+                                    collectionDeletionProvider(collection.id));
+                                // Remove the collection from expandedCollections if it's expanded
+                                expandedCollections.remove(collection.id);
+                              } catch (e) {
+                                print('Error deleting collection: $e');
+                                // Show an error message to the user
+                              }
                             }
                           },
                         ),

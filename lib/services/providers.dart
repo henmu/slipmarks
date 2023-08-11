@@ -67,7 +67,7 @@ class BookmarkUpdateParameters {
   BookmarkUpdateParameters(this.bookmarkId, this.newName);
 }
 
-final collectionsProvider = FutureProvider<List<Collections>>((ref) async {
+final collectionProvider = FutureProvider<List<Collections>>((ref) async {
   final url = Uri.parse("$SERVER_HOST/collections");
   final accessToken = AuthService.instance.accessToken;
   final response =
@@ -131,6 +131,20 @@ Future<bool> addBookmarkToCollection(
     throw Exception('Failed to add bookmark to collection');
   }
 }
+
+final collectionDeletionProvider =
+    FutureProvider.family<void, String>((ref, collectionId) async {
+  final url = Uri.parse('$SERVER_HOST/collections/$collectionId');
+  final accessToken = AuthService.instance.accessToken;
+  final response = await http.delete(
+    url,
+    headers: {'Authorization': 'Bearer $accessToken'},
+  );
+
+  if (response.statusCode != 204) {
+    throw Exception('Failed to delete the bookmark');
+  }
+});
 
 final bookmarkAdditionProvider =
     FutureProviderFamily<void, BookmarkAdditionParameters>((ref, params) async {
